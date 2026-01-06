@@ -1,13 +1,9 @@
 // Initialization
 import app from "./app.js";
 import mongoose from "mongoose";
-// import dotenv from "dotenv";
-
-// dotenv.config();
 import dotenv from 'dotenv';
-dotenv.config();
 
-console.log(process.env.JWT_SECRET); // just to check
+dotenv.config();
 
 const port = process.env.PORT || 3000;
 

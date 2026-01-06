@@ -126,13 +126,75 @@ If you want to test without sending real emails, you can:
 2. Use **Ethereal Email** (https://ethereal.email) - generates test accounts
 3. Check server logs for email content (currently emails are sent, but you can add logging)
 
+## Environment Variables Required
+
+Add these to your `.env` file:
+
+```env
+# Email Configuration (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+
+# Frontend URL (for email links)
+FRONTEND_URL=http://localhost:5173
+```
+
+## Email Features Implemented
+
+✅ **Email Verification**
+- Users receive verification email on registration
+- Email verification required before login
+- Resend verification email endpoint
+- Verification tokens expire after 24 hours
+
+✅ **Appointment Confirmation Emails**
+- Patients receive confirmation email when booking appointments
+- Includes appointment details (doctor, date, time, reason)
+
+✅ **Email Templates**
+- HTML email templates with styling
+- Plain text fallback for email clients
+- Professional branding
+
+## API Endpoints
+
+### Email Verification
+- `POST /api/auth/verify-email` - Verify email with token
+- `POST /api/auth/resend-verification` - Resend verification email
+
+### Example: Verify Email
+```json
+POST /api/auth/verify-email
+{
+  "token": "verification-token-from-email"
+}
+```
+
+### Example: Resend Verification
+```json
+POST /api/auth/resend-verification
+{
+  "email": "user@example.com"
+}
+```
+
 ## Next Steps
 
 1. ✅ Configure `.env` with your email settings
 2. ✅ Test registration to receive verification email
 3. ✅ Test email verification
-4. ✅ Test password reset email
+4. ✅ Test appointment booking to receive confirmation email
 5. ✅ Deploy and configure production email service
+
+
+
+
+
+
+
+
 
 
 
