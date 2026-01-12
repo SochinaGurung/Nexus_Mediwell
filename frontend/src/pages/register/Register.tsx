@@ -1,33 +1,40 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { authService } from '../services/authService'
-import './Login.css'
+import { useNavigate, Link } from 'react-router-dom'
+import { authService } from '../../services/authService'
+import './Register.css'
 
-interface LoginFormData {
+interface RegisterFormData {
   username: string
+  email: string
   password: string
+  confirmPassword: string
 }
 
-interface LoginResponse {
+interface RegisterResponse {
   message: string
-  token: string
   user: {
     id: string
     username: string
     email: string
     role: 'patient' | 'doctor' | 'admin'
   }
+  emailSent?: boolean
+  emailError?: string
 }
 
-function Login() {
+export default function Register() {
   const navigate = useNavigate()
-  const [formData, setFormData] = useState<LoginFormData>({
+  const [formData, setFormData] = useState<RegisterFormData>({
     username: '',
+    email: '',
     password: '',
+    confirmPassword: '',
   })
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false)
+  const [success, setSuccess] = useState<string>('')
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -37,34 +44,81 @@ function Login() {
     }))
     // Clear error when user starts typing
     if (error) setError('')
+    if (success) setSuccess('')
+  }
+
+  const validateForm = (): boolean => {
+    if (!formData.username.trim()) {
+      setError('Username is required')
+      return false
+    }
+
+    if (formData.username.length < 3) {
+      setError('Username must be at least 3 characters long')
+      return false
+    }
+
+    if (!formData.email.trim()) {
+      setError('Email is required')
+      return false
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address')
+      return false
+    }
+
+    if (!formData.password) {
+      setError('Password is required')
+      return false
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long')
+      return false
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match')
+      return false
+    }
+
+    return true
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError('')
+    setSuccess('')
+
+    if (!validateForm()) {
+      return
+    }
+
     setLoading(true)
 
     try {
-      const response = (await authService.login(
-        formData.username,
-        formData.password
-      )) as LoginResponse
+      const response = (await authService.register({
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        role: 'patient', // Default role for new registrations
+      })) as RegisterResponse
 
-      if (response.token) {
-        // Redirect based on user role
-        const user = response.user
-        if (user.role === 'admin') {
-          navigate('/admin/dashboard')
-        } else if (user.role === 'doctor') {
-          navigate('/doctor/dashboard')
-        } else {
-          navigate('/patient/dashboard')
-        }
-      }
+      setSuccess(
+        response.message ||
+          'Registration successful! Please check your email to verify your account.'
+      )
+
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        navigate('/login')
+      }, 3000)
     } catch (err: unknown) {
       const errorMessage =
         (err as { message?: string })?.message ||
-        'Login failed. Please check your credentials.'
+        'Registration failed. Please try again.'
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -72,9 +126,9 @@ function Login() {
   }
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
+    <div className="register-container">
+      <div className="register-card">
+        <div className="register-header">
           <div className="logo">
             <svg
               width="48"
@@ -107,10 +161,10 @@ function Login() {
             </svg>
           </div>
           <h1>Nexus Medwell</h1>
-          <p>Hospital Management System</p>
+          <p>Create your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
+        <form onSubmit={handleSubmit} className="register-form">
           {error && (
             <div className="error-message" role="alert">
               <svg
@@ -139,6 +193,32 @@ function Login() {
                 />
               </svg>
               <span>{error}</span>
+            </div>
+          )}
+
+          {success && (
+            <div className="success-message" role="alert">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M6 10L9 13L14 7"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span>{success}</span>
             </div>
           )}
 
@@ -172,6 +252,38 @@ function Login() {
                 placeholder="Enter your username"
                 required
                 autoComplete="username"
+                minLength={3}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <div className="input-wrapper">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M2 5L10 10L18 5M2 5L2 15L18 15L18 5M2 5L10 10L18 5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
+                required
+                autoComplete="email"
               />
             </div>
           </div>
@@ -201,7 +313,8 @@ function Login() {
                 onChange={handleChange}
                 placeholder="Enter your password"
                 required
-                autoComplete="current-password"
+                autoComplete="new-password"
+                minLength={6}
               />
               <button
                 type="button"
@@ -248,19 +361,84 @@ function Login() {
             </div>
           </div>
 
-          <div className="form-options">
-            <label className="remember-me">
-              <input type="checkbox" />
-              <span>Remember me</span>
-            </label>
-            <a href="/forgot-password" className="forgot-password">
-              Forgot password?
-            </a>
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <div className="input-wrapper">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15 9H15.01M11 9H11.01M7 9H7.01M4 9C4 7.89543 4.89543 7 6 7H14C15.1046 7 16 7.89543 16 9V15C16 16.1046 15.1046 17 14 17H6C4.89543 17 4 16.1046 4 15V9Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm your password"
+                required
+                autoComplete="new-password"
+                minLength={6}
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                aria-label={
+                  showConfirmPassword ? 'Hide password' : 'Show password'
+                }
+              >
+                {showConfirmPassword ? (
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10 12.5C11.3807 12.5 12.5 11.3807 12.5 10C12.5 8.61929 11.3807 7.5 10 7.5C8.61929 7.5 7.5 8.61929 7.5 10C7.5 11.3807 8.61929 12.5 10 12.5Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="M10 3.75C6.25 3.75 3.10833 5.73333 1.66667 8.75C3.10833 11.7667 6.25 13.75 10 13.75C13.75 13.75 16.8917 11.7667 18.3333 8.75C16.8917 5.73333 13.75 3.75 10 3.75Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M2.5 2.5L17.5 17.5M8.33333 8.33333C7.89131 8.77536 7.66667 9.375 7.66667 10C7.66667 10.625 7.89131 11.2246 8.33333 11.6667M11.6667 11.6667C12.1087 11.2246 12.3333 10.625 12.3333 10C12.3333 9.375 12.1087 8.77536 11.6667 8.33333M3.33333 3.33333C1.49167 4.65833 0.416667 6.66667 0.416667 10C0.416667 13.3333 1.49167 15.3417 3.33333 16.6667M16.6667 16.6667C18.5083 15.3417 19.5833 13.3333 19.5833 10C19.5833 6.66667 18.5083 4.65833 16.6667 3.33333"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           <button
             type="submit"
-            className="login-button"
+            className="register-button"
             disabled={loading}
           >
             {loading ? (
@@ -297,10 +475,10 @@ function Login() {
                     />
                   </circle>
                 </svg>
-                Signing in...
+                Creating account...
               </>
             ) : (
-              'Sign In'
+              'Create Account'
             )}
           </button>
 
@@ -308,15 +486,13 @@ function Login() {
             <span>or</span>
           </div>
 
-          <p className="signup-link">
-            Don't have an account?{' '}
-            <a href="/register">Sign up here</a>
+          <p className="login-link">
+            Already have an account?{' '}
+            <Link to="/login">Sign in here</Link>
           </p>
         </form>
       </div>
     </div>
   )
 }
-
-export default Login
 
