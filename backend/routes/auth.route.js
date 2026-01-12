@@ -1,15 +1,28 @@
-import {Router} from 'express';
-const router =Router();
-import {register} from '../controllers/auth.controller.js';
-import {login} from '../controllers/auth.controller.js';
-import {logout} from '../controllers/auth.controller.js';
-import {updateProfile, getProfile, getAllUsers, updateMedicalRecord, deleteAccount} from '../controllers/auth.controller.js';
-import {verifyEmail, resendVerificationEmail} from '../controllers/auth.controller.js';
-import {forgotPassword, resetPassword, changePassword} from '../controllers/auth.controller.js';
+import { Router } from 'express';
+const router = Router();
 
+import {
+    register,
+    login,
+    logout,
+    updateProfile,
+    getProfile,
+    getAllUsers,
+    updateMedicalRecord,
+    deleteAccount,
+    verifyEmail,
+    resendVerificationEmail,
+    forgotPassword,
+    resetPassword,
+    changePassword
+} from '../controllers/auth.controller.js';
+
+import { protect, allowRoles, optionalAuth } from '../middleware/auth.middleware.js';
+
+// Public routes
 router.post('/register', register);
 router.post('/login', login);
-router.post('/logout', logout);
+router.post('/logout', protect, logout); // Logout requires login
 
 // Email verification routes
 router.post('/verify-email', verifyEmail);
@@ -18,22 +31,22 @@ router.post('/resend-verification', resendVerificationEmail);
 // Password management routes
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
-router.post('/change-password', changePassword);
+router.post('/change-password', protect, changePassword); // Change password requires login
 
-// Profile routes - require authentication
-router.get('/profile', getProfile);
-router.get('/profile/:userId', getProfile); // Admin can view any profile
-router.put('/profile', updateProfile);
-router.put('/profile/:userId', updateProfile); // Admin can update any profile
+// Profile routes
+router.get('/profile', protect, getProfile); // User must be logged in
+router.get('/profile/:userId', protect, allowRoles('admin'), getProfile); // Admin can view any profile
+router.put('/profile', protect, updateProfile); // User updates own profile
+router.put('/profile/:userId', protect, allowRoles('admin'), updateProfile); // Admin updates any profile
 
 // Medical record routes - patient only
-router.put('/medical-record', updateMedicalRecord); // Update medical record (patient only)
+router.put('/medical-record', protect, allowRoles('patient'), updateMedicalRecord); // Only patients
 
 // Account management routes
-router.delete('/account', deleteAccount); // Delete own account
-router.delete('/account/:userId', deleteAccount); // Admin can delete any account
+router.delete('/account', protect, deleteAccount); // Delete own account
+router.delete('/account/:userId', protect, allowRoles('admin'), deleteAccount); // Admin can delete any account
 
-// Admin routes - require admin authentication
-router.get('/users', getAllUsers); // Get all users (admin only)
+// Admin routes
+router.get('/users', protect, allowRoles('admin'), getAllUsers); // Admin only
 
 export default router;

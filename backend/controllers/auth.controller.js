@@ -744,7 +744,7 @@ export async function changePassword(req, res) {
         user.password = hashedPassword;
         await user.save();
 
-        console.log(`✅ Password changed successfully for user: ${user.username}`);
+        console.log(`Password changed successfully for user: ${user.username}`);
 
         res.status(200).json({
             message: "Password changed successfully"
@@ -878,7 +878,7 @@ export async function getAllUsers(req, res) {
         const hasNextPage = pageNumber < totalPages;
         const hasPrevPage = pageNumber > 1;
 
-        console.log(`✅ Admin ${decoded.username} retrieved ${users.length} users (page ${pageNumber}/${totalPages})`);
+        console.log(` Admin ${decoded.username} retrieved ${users.length} users (page ${pageNumber}/${totalPages})`);
 
         res.status(200).json({
             message: "Users retrieved successfully",
@@ -1121,7 +1121,7 @@ export async function deleteAccount(req, res) {
         // Delete the user account
         await User.findByIdAndDelete(userId);
 
-        console.log(`✅ Account deleted: ${user.username} (${user.role})`);
+        console.log(` Account deleted: ${user.username} (${user.role})`);
 
         res.status(200).json({
             message: 'Account deleted successfully',

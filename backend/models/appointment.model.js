@@ -43,7 +43,7 @@ const appointmentSchema = new Schema({
     }
 });
 
-// Update the updatedAt field before saving
+// Update 
 appointmentSchema.pre('save', function() {
     this.updatedAt = Date.now();
 });

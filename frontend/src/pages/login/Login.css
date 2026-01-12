@@ -136,17 +136,9 @@
   gap: 12px;
 }
 
-.input-wrapper svg:first-child {
-  position: absolute;
-  left: 16px;
-  color: var(--text-secondary);
-  pointer-events: none;
-  z-index: 1;
-}
-
 .input-wrapper input {
   width: 100%;
-  padding: 14px 16px 14px 48px;
+  padding: 14px 16px;
   border: 2px solid var(--border-color);
   border-radius: 12px;
   font-size: 15px;

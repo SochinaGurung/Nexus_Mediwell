@@ -168,7 +168,7 @@ const userSchema = new Schema({
     }
 });
 
-// Update the updatedAt field before saving
+// Update 
 userSchema.pre('save', function() {
     this.updatedAt = Date.now();
 });

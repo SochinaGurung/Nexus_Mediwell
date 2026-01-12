@@ -146,24 +146,6 @@ export default function Login() {
           <div className="form-group">
             <label htmlFor="username">Username</label>
             <div className="input-wrapper">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M10 10C12.7614 10 15 7.76142 15 5C15 2.23858 12.7614 0 10 0C7.23858 0 5 2.23858 5 5C5 7.76142 7.23858 10 10 10Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-                <path
-                  d="M10 12C5.58172 12 2 14.6863 2 18V20H18V18C18 14.6863 14.4183 12 10 12Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-              </svg>
               <input
                 type="text"
                 id="username"
@@ -180,20 +162,6 @@ export default function Login() {
           <div className="form-group">
             <label htmlFor="password">Password</label>
             <div className="input-wrapper">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M15 9H15.01M11 9H11.01M7 9H7.01M4 9C4 7.89543 4.89543 7 6 7H14C15.1046 7 16 7.89543 16 9V15C16 16.1046 15.1046 17 14 17H6C4.89543 17 4 16.1046 4 15V9Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="password"
