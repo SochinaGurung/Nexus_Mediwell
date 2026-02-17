@@ -54,7 +54,7 @@ const userSchema = new Schema({
         enum: ["male", "female", "other", "prefer not to say"]
     },
     profilePicture: {
-        type: String, // URL or file path
+        type: String, 
         default: null
     },
     
@@ -109,7 +109,10 @@ const userSchema = new Schema({
     },
     consultationFee: {
         type: Number,
-        default: 0
+        default: 0,
+        required: function () {
+            return this.role === 'doctor';
+        }
     },
     availability: {
         monday: { available: { type: Boolean, default: false }, startTime: String, endTime: String },
