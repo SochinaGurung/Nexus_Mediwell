@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react'
+import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { authService } from '../../services/authService'
 import './Login.css'
@@ -33,6 +33,23 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
 
+  useEffect(()=>{
+    const token=localStorage.getItem('token') || sessionStorage.getItem('token')
+    const role=localStorage.getItem('role') || sessionStorage.getItem('token')
+    
+
+    if(token && role){
+      if(role==='admin'){
+        navigate('/admin/dashboard',{replace:true})
+      }
+      else if(role==='doctor'){
+        navigate('/doctor/dashboard',{replace:true})
+      }else{
+        navigate('/patient/dashboard',{replace:true})
+      }
+    }
+  },[navigate])
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -51,27 +68,31 @@ export default function Login() {
       )) as LoginResponse
 
       if (response.token) {
-      // Store token
-      localStorage.setItem('token', response.token)
 
-      // Always store username for Home page
-      localStorage.setItem('username', response.user.username)
+        const storage = rememberMe ? localStorage : sessionStorage
+
+      // Store token
+      storage.setItem('token', response.token)
+      //Storing username for Home page
+      storage.setItem('username', response.user.username)
+      storage.setItem('role', response.user.role)
+
 
       const { role } = response.user
       
-      // Check if user was trying to book an appointment
+      // Checking if user is trying to book an appointment
       const selectedDoctorId = localStorage.getItem('selectedDoctorId')
       const fromBooking = location.state?.from === 'book-appointment'
       
       if (role === 'admin') {
-        navigate('/admin/dashboard')
+        navigate('/admin/dashboard',{replace:true})
       } else if (role === 'doctor') {
-        navigate('/doctor/dashboard')
+        navigate('/doctor/dashboard',{replace:true})
       } else if (fromBooking && selectedDoctorId) {
         // Redirect to appointment booking page if coming from booking
-        navigate('/appointments/book')
+        navigate('/appointments/book',{replace:true})
       } else {
-        navigate('/patient/dashboard')
+        navigate('/patient/dashboard',{replace:true})
       }
     }
 
@@ -92,9 +113,9 @@ export default function Login() {
           <div className="logo">
             <div className="logo-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#4A90E2" />
-                <path d="M2 17L12 22L22 17" stroke="#4A90E2" strokeWidth="2" strokeLinecap="round" />
-                <path d="M2 12L12 17L22 12" stroke="#4A90E2" strokeWidth="2" strokeLinecap="round" />
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#2C5F7C" />
+                <path d="M2 17L12 22L22 17" stroke="#2C5F7C" strokeWidth="2" strokeLinecap="round" />
+                <path d="M2 12L12 17L22 12" stroke="#2C5F7C" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
             <span className="logo-text">Nexus Mediwell</span>
