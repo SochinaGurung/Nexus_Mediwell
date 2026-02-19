@@ -1,0 +1,234 @@
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 100px 100px;
+  background: linear-gradient(to right, #f5f9fc 45%, #eaf2f7 55%);
+  gap: 100px;
+}
+
+/* LEFT SIDE */
+.hero-text {
+  flex: 1;
+  max-width: 520px;
+}
+
+.badge {
+  display: inline-block;
+  background-color: #2C5F7C;
+  color: #ffffff;
+  font-size: 12px;
+  padding: 7px 16px;
+  border-radius: 30px;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.hero-text h1 {
+  font-size: 52px;
+  font-weight: 700;
+  color: #1e2a32;
+  line-height: 1.15;
+  margin-bottom: 25px;
+}
+
+.hero-text p {
+  font-size: 17px;
+  color: #555;
+  line-height: 1.8;
+  margin-bottom: 35px;
+}
+
+/* ================= HERO BUTTONS ================= */
+
+.hero-buttons {
+  display: flex;
+  gap: 18px;
+}
+
+.primary-btn {
+  background-color: #2C5F7C;
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.primary-btn:hover {
+  background-color: #214a60;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(44, 95, 124, 0.25);
+}
+
+.secondary-btn {
+  background-color: transparent;
+  color: #2C5F7C;
+  border: 2px solid #2C5F7C;
+  padding: 13px 30px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.secondary-btn:hover {
+  background-color: #2C5F7C;
+  color: white;
+}
+
+/*  Hospital Image  */
+.hospital-image {
+  flex: 1.2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hospital-image img {
+  width: 600px;            
+  max-width: 100%;
+  border-radius: 24px;
+  box-shadow: 0 35px 70px rgba(0, 0, 0, 0.12);
+}
+
+/*  SERVICES SECTION  */
+
+.services {
+  padding: 110px 100px;
+  background-color: #ffffff;
+}
+
+.services-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 70px;
+  gap: 60px;
+}
+
+.section-tag {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #2C5F7C;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.services-header h2 {
+  font-size: 40px;
+  color: #1e2a32;
+}
+
+.services-header p {
+  max-width: 420px;
+  color: #666;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ================= SERVICE CARDS ================= */
+
+.service-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 35px;
+}
+
+.service-card {
+  background: #f5f9fc;
+  padding: 35px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.service-card:hover {
+  background: #ffffff;
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.07);
+}
+
+.service-card .icon {
+  font-size: 32px;
+  margin-bottom: 18px;
+  color: #2C5F7C;
+}
+
+.service-card h3 {
+  font-size: 19px;
+  margin-bottom: 14px;
+  color: #1e2a32;
+}
+
+.service-card p {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.7;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1200px) {
+  .hero {
+    padding: 100px 60px;
+  }
+
+  .services {
+    padding: 100px 60px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .service-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 90px 40px;
+  }
+
+  .hero-text {
+    max-width: 100%;
+  }
+
+  .hero-text h1 {
+    font-size: 42px;
+  }
+
+  .hero-buttons {
+    justify-content: center;
+  }
+
+  .hero-image img {
+    width: 100%;
+    max-width: 500px;
+    margin-top: 40px;
+  }
+
+  .services {
+    padding: 80px 40px;
+  }
+
+  .services-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .service-cards {
+    grid-template-columns: 1fr;
+  }
+}
