@@ -35,7 +35,7 @@ export default function Login() {
 
   useEffect(()=>{
     const token=localStorage.getItem('token') || sessionStorage.getItem('token')
-    const role=localStorage.getItem('role') || sessionStorage.getItem('token')
+    const role=localStorage.getItem('role') || sessionStorage.getItem('role')
     
 
     if(token && role){
