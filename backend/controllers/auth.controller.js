@@ -1,14 +1,49 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import validator from "validator";
+import dns from "dns";
+import { promisify } from "util";
 import User from "../models/user.model.js";
 import Appointment from "../models/appointment.model.js";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/emailService.js";
 
+const resolveMx = promisify(dns.resolveMx);
+
 //  REGISTER FUNCTION
 export async function register(req, res) {
     try {
-        const { username, password, email, role } = req.body;
+        const { username, password, email, role, specialty, specialization, department, qualifications, yearsOfExperience, licenseNumber, consultationFee } = req.body;
+        if (!username || !password || !email) {
+            return res.status(400).json({ 
+                message: 'Username, password, and email are required' 
+            });
+        }
+
+        const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
+
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                message:
+                "Password must be at least 8 characters and include uppercase, lowercase, and number"
+            });
+        }
+
+        // Validate email format using validator library (stricter validation)
+        if (!validator.isEmail(email, { allow_utf8_local_part: false, require_tld: true })) {
+            return res.status(400).json({ 
+                message: 'Invalid email format. Please enter a valid email address.' 
+            });
+        }
+        
+        // Normalize email (lowercase)
+        const normalizedEmail = validator.normalizeEmail(email);
+        if (!normalizedEmail) {
+            return res.status(400).json({ 
+                message: 'Invalid email address. Please check your email and try again.' 
+            });
+        }
 
         const userRole = role || "patient";
 
@@ -18,7 +53,7 @@ export async function register(req, res) {
             return res.status(400).json({ message: "Invalid role. Allowed roles: patient, doctor, admin" });
         }
         
-        // Checks if trying to register as doctor or admin
+        // Checks if user is trying to register as doctor or admin
         if (userRole === "doctor" || userRole === "admin") {
             const authHeader = req.headers.authorization;
             if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -29,6 +64,12 @@ export async function register(req, res) {
             
             const token = authHeader.split(" ")[1];
             try {
+                if (!process.env.JWT_SECRET) {
+                    console.error('JWT_SECRET is not set in environment variables');
+                    return res.status(500).json({ 
+                        message: 'Server configuration error' 
+                    });
+                }
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
                 if (decoded.role !== "admin") {
                     return res.status(403).json({ 
@@ -48,7 +89,8 @@ export async function register(req, res) {
             return res.status(400).json({ message: 'Username already exists' });
         }
 
-        const existingEmail = await User.findOne({ email });
+        // Check for duplicate email using normalized email
+        const existingEmail = await User.findOne({ email: normalizedEmail });
         if (existingEmail) {
             return res.status(400).json({ message: 'Email already exists' });
         }
@@ -59,47 +101,231 @@ export async function register(req, res) {
         const emailVerificationToken = crypto.randomBytes(32).toString("hex");
         const emailVerificationTokenExpiry = Date.now() + 86400000; // 24 hours from now
 
-        const user = new User({ 
+        // Build user data object (email will be normalized later before user creation)
+        const userData = { 
             username, 
-            email, 
+            email: normalizedEmail, // Use normalized email
             password: hashedPassword, 
             role: userRole,
             emailVerificationToken,
             emailVerificationTokenExpiry,
             isEmailVerified: false
-        });
-        await user.save();
+        };
 
-        // Send verification email
-        console.log(`Sending verification email to: ${email}`);
-        const emailResult = await sendVerificationEmail(email, emailVerificationToken, username);
+        // Add doctor-specific fields if registering as doctor
+        if (userRole === "doctor") {
+            // Handle both 'specialty' (from form) and 'specialization' (model field)
+            if (specialty || specialization) {
+                userData.specialization = specialty || specialization;
+            }
+            if (department) {
+                userData.department = department.trim();
+            }
+            if (licenseNumber) {
+                userData.licenseNumber = licenseNumber.trim();
+            }
+            if (yearsOfExperience !== undefined && yearsOfExperience !== null) {
+                userData.yearsOfExperience = parseInt(yearsOfExperience, 10) || 0;
+            }
+            if (consultationFee !== undefined && consultationFee !== null) {
+                userData.consultationFee = parseFloat(consultationFee) || 0;
+            } else {
+                // Set default consultation fee if not provided
+                userData.consultationFee = 0;
+            }
+            // Parse qualifications from string to array format
+            // Format: "MBBS, MD" or "MBBS - Harvard, MD - Stanford" or "MBBS (Harvard, 2010), MD (Stanford, 2015)"
+            if (qualifications && qualifications.trim()) {
+                try {
+                    // Try to parse as JSON array first (if sent as structured data)
+                    if (qualifications.trim().startsWith('[')) {
+                        userData.qualifications = JSON.parse(qualifications);
+                    } else {
+                        // Parse as comma-separated string
+                        // Simple format: "MBBS, MD" -> [{degree: "MBBS"}, {degree: "MD"}]
+                        const quals = qualifications.split(',').map(q => q.trim()).filter(q => q);
+                        userData.qualifications = quals.map(qual => {
+                            // Try to parse format like "MBBS (Harvard, 2010)" or "MBBS - Harvard - 2010"
+                            const parts = qual.split(/[(-]| - /).map(p => p.trim());
+                            const degree = parts[0];
+                            const institution = parts[1] || '';
+                            const year = parts[2] ? parseInt(parts[2], 10) : undefined;
+                            
+                            return {
+                                degree: degree,
+                                institution: institution || '',
+                                year: year || undefined
+                            };
+                        });
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing qualifications:', parseError);
+                    // Fallback: treat entire string as a single degree
+                    userData.qualifications = [{
+                        degree: qualifications.trim(),
+                        institution: '',
+                        year: undefined
+                    }];
+                }
+            }
+        }
+
+        // Enhanced email validation BEFORE creating user
+        // Check if email service is configured
+        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+            return res.status(503).json({
+                message: 'Email service is not configured. Registration is temporarily unavailable. Please contact support.'
+            });
+        }
+
+        // Enhanced email format validation
+        const emailDomain = normalizedEmail.split('@')[1];
+        if (!emailDomain) {
+            return res.status(400).json({
+                message: 'Invalid email address format. Please check your email address.'
+            });
+        }
+
+        // Check for disposable email domains (common ones)
+        const disposableDomains = [
+            'tempmail.com', 'guerrillamail.com', 'mailinator.com', '10minutemail.com',
+            'throwaway.email', 'temp-mail.org', 'getnada.com', 'mohmal.com',
+            'maildrop.cc', 'throwawaymail.com', 'fakeinbox.com', 'tempmailo.com'
+        ];
+
+        if (disposableDomains.some(domain => emailDomain.toLowerCase().includes(domain))) {
+            return res.status(400).json({
+                message: 'Disposable email addresses are not allowed. Please use a valid email address.'
+            });
+        }
+
+        // Verify domain has MX records (email servers)
+        try {
+            const mxRecords = await resolveMx(emailDomain);
+            if (!mxRecords || mxRecords.length === 0) {
+                return res.status(400).json({
+                    message: `Invalid email address: ${normalizedEmail}. The email domain does not exist or cannot receive emails. Please check your email address.`
+                });
+            }
+            console.log(`✓ Email domain ${emailDomain} has MX records:`, mxRecords.map(r => r.exchange).join(', '));
+        } catch (dnsError) {
+            console.error(`DNS lookup failed for ${emailDomain}:`, dnsError.message);
+            return res.status(400).json({
+                message: `Invalid email address: ${normalizedEmail}. The email domain does not exist or cannot receive emails. Please check your email address.`
+            });
+        }
+
+        // Try to validate email by attempting to send (SMTP will reject immediately for some invalid formats)
+        let emailValidationResult = { success: false, error: null, userMessage: null };
+        try {
+            console.log(`Validating email address: ${normalizedEmail}`);
+            emailValidationResult = await sendVerificationEmail(normalizedEmail, 'validation-token', username);
+            
+            if (!emailValidationResult.success) {
+                const errorMsg = emailValidationResult.userMessage || emailValidationResult.error || '';
+                
+                // Check for specific invalid email errors
+                if (errorMsg.includes('not found') || errorMsg.includes('invalid') || 
+                    errorMsg.includes('550') || errorMsg.includes('553') ||
+                    errorMsg.includes('Invalid recipient') || errorMsg.includes('Address rejected') ||
+                    errorMsg.includes('User unknown') || errorMsg.includes('Mailbox') ||
+                    errorMsg.includes('does not exist') || errorMsg.includes('rejected')) {
+                    return res.status(400).json({
+                        message: `Invalid email address: ${normalizedEmail}. The email address may not exist or is invalid. Please check your email address and try again.`,
+                        emailError: emailValidationResult.userMessage || emailValidationResult.error
+                    });
+                }
+                
+                // For connection/service errors, reject registration
+                return res.status(503).json({
+                    message: 'Unable to send verification email. Registration is temporarily unavailable. Please try again later or contact support.',
+                    emailError: emailValidationResult.userMessage || emailValidationResult.error
+                });
+            }
+        } catch (emailError) {
+            console.error("Email validation error:", emailError);
+            const errorMsg = emailError.message || '';
+            
+            // Check if it's an invalid email error
+            if (errorMsg.includes('550') || errorMsg.includes('553') || 
+                errorMsg.includes('Invalid') || errorMsg.includes('not found') ||
+                errorMsg.includes('does not exist') || errorMsg.includes('rejected')) {
+                return res.status(400).json({
+                    message: `Invalid email address: ${normalizedEmail}. Please check your email address and try again.`,
+                    emailError: errorMsg
+                });
+            }
+            
+            return res.status(503).json({
+                message: 'Email service error. Unable to verify email address. Please try again later or contact support.',
+                emailError: errorMsg
+            });
+        }
+
+        // If email validation passed, proceed with user creation
+        const user = new User(userData);
+        
+        try {
+            await user.save();
+        } catch (saveError) {
+            console.error('Error saving user to database:', saveError);
+            // Handle duplicate key errors
+            if (saveError.name === 'MongoServerError' && saveError.code === 11000) {
+                const field = Object.keys(saveError.keyPattern)[0];
+                return res.status(400).json({ 
+                    message: `${field} already exists` 
+                });
+            }
+            throw saveError; // Re-throw to be caught by outer catch
+        }
+
+        // Send actual verification email (should succeed since we validated above)
+        console.log(`Sending verification email to: ${normalizedEmail}`);
+        const emailResult = await sendVerificationEmail(normalizedEmail, emailVerificationToken, username);
         
         if (!emailResult.success) {
-            console.error("Failed to send verification email:");
-            console.error("Error:", emailResult.error);
-            console.error("Details:", emailResult.details);
-            console.error("User registered but email verification failed!");
-            console.error("User will need to use /api/auth/resend-verification endpoint");
+            // If email fails after user is created, log but don't fail (rare case)
+            console.error("Failed to send verification email after user creation:", emailResult.error);
+            // User can use resend verification endpoint
         } else {
             console.log("Verification email sent successfully!");
         }
 
         res.status(201).json({
-            message: emailResult.success 
-                ? 'User registered successfully. Please check your email to verify your account.'
-                : 'User registered successfully, but email verification failed. Please use the resend verification endpoint.',
+            message: 'User registered successfully. Please check your email to verify your account.',
             user: {
                 id: user._id,
                 username: user.username,
                 email: user.email,
                 role: user.role
             },
-            emailSent: emailResult.success,
-            ...(emailResult.success ? {} : { emailError: emailResult.error })
+            emailSent: emailResult.success
         });
 
     } catch (err) {
-        res.status(500).json({ message: 'Server error', error: err.message });
+        console.error('Registration error:', err);
+        console.error('Error stack:', err.stack);
+        
+        // Handle specific error types
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ 
+                message: 'Validation error', 
+                error: err.message 
+            });
+        }
+        
+        if (err.name === 'MongoServerError' && err.code === 11000) {
+            // Duplicate key error
+            const field = Object.keys(err.keyPattern)[0];
+            return res.status(400).json({ 
+                message: `${field} already exists` 
+            });
+        }
+        
+        res.status(500).json({ 
+            message: 'Server error during registration', 
+            error: process.env.NODE_ENV === 'development' ? err.message : 'An error occurred. Please try again.' 
+        });
     }
 }
 
@@ -562,6 +788,26 @@ export async function resendVerificationEmail(req, res) {
         
         if (!emailResult.success) {
             console.error("Failed to send verification email:", emailResult.error);
+            
+            // Provide user-friendly error message
+            const errorMessage = emailResult.userMessage || emailResult.error || 'Failed to send email';
+            let userFriendlyMessage = "Failed to send verification email. ";
+            
+            if (errorMessage.includes('not found') || errorMessage.includes('invalid') || errorMessage.includes('550')) {
+                userFriendlyMessage += "The email address may be invalid or not found. Please check your email address and try again.";
+            } else if (errorMessage.includes('configuration') || errorMessage.includes('service')) {
+                userFriendlyMessage += "Email service is currently unavailable. Please try again later or contact support.";
+            } else if (errorMessage.includes('connection') || errorMessage.includes('timeout')) {
+                userFriendlyMessage += "Unable to connect to email server. Please try again later.";
+            } else {
+                userFriendlyMessage += "Please try again later or contact support.";
+            }
+            
+            return res.status(500).json({
+                message: userFriendlyMessage,
+                emailSent: false,
+                error: emailResult.error
+            });
         }
 
         res.status(200).json({
@@ -613,8 +859,22 @@ export async function forgotPassword(req, res) {
             user.resetTokenExpiry = null;
             await user.save();
             
+            // Provide user-friendly error message
+            const errorMessage = emailResult.userMessage || emailResult.error || 'Failed to send email';
+            let userFriendlyMessage = "Failed to send password reset email. ";
+            
+            if (errorMessage.includes('not found') || errorMessage.includes('invalid') || errorMessage.includes('550')) {
+                userFriendlyMessage += "The email address may be invalid or not found. Please check your email address and try again.";
+            } else if (errorMessage.includes('configuration') || errorMessage.includes('service')) {
+                userFriendlyMessage += "Email service is currently unavailable. Please try again later or contact support.";
+            } else if (errorMessage.includes('connection') || errorMessage.includes('timeout')) {
+                userFriendlyMessage += "Unable to connect to email server. Please try again later.";
+            } else {
+                userFriendlyMessage += "Please try again later or contact support.";
+            }
+            
             return res.status(500).json({
-                message: "Failed to send password reset email. Please try again later.",
+                message: userFriendlyMessage,
                 error: emailResult.error
             });
         }
