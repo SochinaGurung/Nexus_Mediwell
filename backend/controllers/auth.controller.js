@@ -30,14 +30,14 @@ export async function register(req, res) {
             });
         }
 
-        // Validate email format using validator library (stricter validation)
+        // Validate email format using validator library
         if (!validator.isEmail(email, { allow_utf8_local_part: false, require_tld: true })) {
             return res.status(400).json({ 
                 message: 'Invalid email format. Please enter a valid email address.' 
             });
         }
         
-        // Normalize email (lowercase)
+        // Normalize email 
         const normalizedEmail = validator.normalizeEmail(email);
         if (!normalizedEmail) {
             return res.status(400).json({ 
@@ -134,7 +134,6 @@ export async function register(req, res) {
                 userData.consultationFee = 0;
             }
             // Parse qualifications from string to array format
-            // Format: "MBBS, MD" or "MBBS - Harvard, MD - Stanford" or "MBBS (Harvard, 2010), MD (Stanford, 2015)"
             if (qualifications && qualifications.trim()) {
                 try {
                     // Try to parse as JSON array first (if sent as structured data)
@@ -142,10 +141,8 @@ export async function register(req, res) {
                         userData.qualifications = JSON.parse(qualifications);
                     } else {
                         // Parse as comma-separated string
-                        // Simple format: "MBBS, MD" -> [{degree: "MBBS"}, {degree: "MD"}]
                         const quals = qualifications.split(',').map(q => q.trim()).filter(q => q);
                         userData.qualifications = quals.map(qual => {
-                            // Try to parse format like "MBBS (Harvard, 2010)" or "MBBS - Harvard - 2010"
                             const parts = qual.split(/[(-]| - /).map(p => p.trim());
                             const degree = parts[0];
                             const institution = parts[1] || '';
@@ -170,7 +167,6 @@ export async function register(req, res) {
             }
         }
 
-        // Enhanced email validation BEFORE creating user
         // Check if email service is configured
         if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
             return res.status(503).json({
@@ -178,7 +174,7 @@ export async function register(req, res) {
             });
         }
 
-        // Enhanced email format validation
+        //email format validation
         const emailDomain = normalizedEmail.split('@')[1];
         if (!emailDomain) {
             return res.status(400).json({
@@ -276,10 +272,10 @@ export async function register(req, res) {
                     message: `${field} already exists` 
                 });
             }
-            throw saveError; // Re-throw to be caught by outer catch
+            throw saveError; 
         }
 
-        // Send actual verification email (should succeed since we validated above)
+        // Send actual verification email 
         console.log(`Sending verification email to: ${normalizedEmail}`);
         const emailResult = await sendVerificationEmail(normalizedEmail, emailVerificationToken, username);
         
@@ -413,6 +409,7 @@ export async function logout(req, res) {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 }
+
 
 // UPDATE PROFILE FUNCTION
 export async function updateProfile(req, res) {
@@ -1375,7 +1372,7 @@ export async function deleteAccount(req, res) {
                 },
                 { $set: { status: "cancelled" } }
             );
-            console.log(`✅ Cancelled ${userAppointments.length} appointment(s) for user ${user.username}`);
+            console.log(`Cancelled ${userAppointments.length} appointment(s) for user ${user.username}`);
         }
 
         // Delete the user account
