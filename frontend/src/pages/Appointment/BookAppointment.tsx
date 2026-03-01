@@ -5,7 +5,7 @@ import Footer from '../components/Footer'
 import { appointmentService } from '../../services/appointmentService'
 import { doctorService, type Doctor } from '../../services/doctorService'
 import { authService } from '../../services/authService'
-//import './BookAppointment.css'
+import './BookAppointment.css'
 
 export default function BookAppointment() {
   const navigate = useNavigate()
@@ -15,6 +15,7 @@ export default function BookAppointment() {
   const [submitting, setSubmitting] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
   const [success, setSuccess] = useState<string>('')
+
 
   const [formData, setFormData] = useState({
     doctorId: '',
@@ -258,9 +259,13 @@ export default function BookAppointment() {
               </div>
 
               <div className="form-actions">
-                <Link to="/doctors" className="cancel-btn">
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() => navigate('/patient/dashboard')}
+                >
                   Cancel
-                </Link>
+                </button>
                 <button type="submit" className="submit-btn" disabled={submitting}>
                   {submitting ? 'Booking Appointment...' : 'Book Appointment'}
                 </button>
