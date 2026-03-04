@@ -5,12 +5,12 @@ import './AdminDashboard.css'
 
 // Importing all the page components
 //import DashboardOverview from './pages/DashboardOverview'
-import DoctorsManagement from './pages/DoctorsManagement'
-import PatientsManagement from './pages/PatientsManagement'
-import DepartmentsManagement from './pages/DepartmentsManagement'
-import AppointmentsManagement from './pages/AppointmentsManagement'
+import DoctorsManagement from './AdminPages/DoctorsManagement'
+import PatientsManagement from './AdminPages/PatientsManagement'
+import DepartmentsManagement from './AdminPages/DepartmentsManagement'
+import AppointmentsManagement from './AdminPages/AppointmentsManagement'
 
-import ActivityLogs from './pages/ActivityLogs'
+import ActivityLogs from './AdminPages/ActivityLogs'
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
