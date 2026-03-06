@@ -212,3 +212,30 @@ export async function sendMessage(req, res) {
   }
 }
 
+// Mark conversation as read by the current user
+export async function markConversationRead(req, res) {
+  try {
+    const userId = String(req.user.userId);
+    const { conversationId } = req.params;
+
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+      return res.status(404).json({ message: 'Conversation not found' });
+    }
+    const memberIds = conversation.members.map((m) => m.toString());
+    if (!memberIds.includes(userId)) {
+      return res.status(403).json({ message: 'Not allowed' });
+    }
+
+    const lastReadAt = conversation.lastReadAt ? { ...conversation.lastReadAt } : {};
+    lastReadAt[userId] = new Date();
+    conversation.lastReadAt = lastReadAt;
+    conversation.markModified('lastReadAt');
+    await conversation.save();
+
+    return res.status(200).json({ message: 'Marked as read' });
+  } catch (err) {
+    console.error('Mark read error:', err);
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+}
