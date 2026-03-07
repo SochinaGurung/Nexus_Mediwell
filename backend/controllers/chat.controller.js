@@ -123,6 +123,52 @@ export async function createOrGetConversation(req, res) {
   }
 }
 
+//List conversations for the current user, with unread count.
+export async function getConversations(req, res) {
+  try {
+    const userId = String(req.user.userId);
+
+    const conversations = await Conversation.find({
+      members: userId
+    }).sort({ updatedAt: -1 });
+
+    const list = await Promise.all(
+      conversations.map(async (conv) => {
+        const otherId = conv.members.find((m) => m.toString() !== userId);
+        const otherUser = await User.findById(otherId).select('firstName lastName username role');
+        const lastMsg = await Message.findOne({ conversationId: conv._id.toString() })
+          .sort({ createdAt: -1 })
+          .lean();
+        const lastRead = (conv.lastReadAt && conv.lastReadAt[userId]) ? new Date(conv.lastReadAt[userId]) : null;
+        const unreadCount = await Message.countDocuments({
+          conversationId: conv._id.toString(),
+          sender: { $ne: userId },
+          ...(lastRead ? { createdAt: { $gt: lastRead } } : {})
+        });
+        return {
+          id: conv._id,
+          otherUser: {
+            id: otherUser?._id,
+            name: otherUser ? [otherUser.firstName, otherUser.lastName].filter(Boolean).join(' ') || otherUser.username : 'Unknown',
+            username: otherUser?.username,
+            role: otherUser?.role
+          },
+          lastMessage: lastMsg ? { text: lastMsg.text, createdAt: lastMsg.createdAt } : null,
+          updatedAt: conv.updatedAt,
+          unreadCount
+        };
+      })
+    );
+
+    return res.status(200).json({
+      message: 'Conversations retrieved',
+      conversations: list
+    });
+  } catch (err) {
+    console.error('Get conversations error:', err);
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+}
 
 //To recieve messages for a conversation
 export async function getMessages(req, res) {
@@ -236,6 +282,28 @@ export async function markConversationRead(req, res) {
     return res.status(200).json({ message: 'Marked as read' });
   } catch (err) {
     console.error('Mark read error:', err);
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+}
+
+// To show the total unread count for the current user on their messages
+export async function getUnreadCount(req, res) {
+  try {
+    const userId = String(req.user.userId);
+    const conversations = await Conversation.find({ members: userId }).lean();
+    let total = 0;
+    for (const conv of conversations) {
+      const lastRead = (conv.lastReadAt && conv.lastReadAt[userId]) ? new Date(conv.lastReadAt[userId]) : null;
+      const count = await Message.countDocuments({
+        conversationId: conv._id.toString(),
+        sender: { $ne: userId },
+        ...(lastRead ? { createdAt: { $gt: lastRead } } : {})
+      });
+      total += count;
+    }
+    return res.status(200).json({ message: 'OK', total });
+  } catch (err) {
+    console.error('Unread count error:', err);
     return res.status(500).json({ message: 'Server error', error: err.message });
   }
 }
