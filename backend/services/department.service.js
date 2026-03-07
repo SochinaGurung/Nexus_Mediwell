@@ -220,7 +220,7 @@ class DepartmentService {
             updates.departmentCode = departmentCode ? departmentCode.trim().toUpperCase() : null;
         }
 
-        //Handle head of department
+        // Handle head of department
         if (headOfDepartment !== undefined) {
             if (headOfDepartment) {
                 const headDoctor = await User.findById(headOfDepartment);
@@ -276,6 +276,75 @@ class DepartmentService {
         return { message: 'Department deleted successfully' };
     }
 
-    
+    //Get department statistics
+    async getDepartmentStats(id) {
+        const department = await Department.findById(id);
+
+        if (!department) {
+            throw new Error('Department not found');
+        }
+
+        // Count doctors in this department
+        const doctorsCount = await User.countDocuments({ 
+            role: 'doctor',
+            department: department.departmentName
+        });
+
+        department.totalDoctors = doctorsCount;
+        await department.save();
+
+        return {
+            departmentName: department.departmentName,
+            totalDoctors: doctorsCount,
+            totalStaff: department.totalStaff || 0,
+            isActive: department.isActive,
+            headOfDepartment: department.headOfDepartment ? {
+                id: department.headOfDepartment._id,
+                name: `${department.headOfDepartment.firstName || ''} ${department.headOfDepartment.lastName || ''}`.trim() || department.headOfDepartment.username
+            } : null
+        };
+    }
+
+     //Get doctors by department ID
+    async getDoctorsByDepartment(departmentId) {
+        const department = await Department.findById(departmentId);
+
+        if (!department) {
+            throw new Error('Department not found');
+        }
+
+        // Find all doctors in this department
+        const doctors = await User.find({ 
+            role: 'doctor',
+            department: department.departmentName,
+            isActive: true
+        })
+        .select('-password -emailVerificationToken -resetToken')
+        .sort({ firstName: 1, lastName: 1 });
+
+        return {
+            department: {
+                id: department._id,
+                name: department.departmentName,
+                code: department.departmentCode
+            },
+            doctors: doctors.map(doctor => ({
+                id: doctor._id,
+                username: doctor.username,
+                email: doctor.email,
+                firstName: doctor.firstName,
+                lastName: doctor.lastName,
+                phoneNumber: doctor.phoneNumber,
+                specialization: doctor.specialization,
+                department: doctor.department,
+                yearsOfExperience: doctor.yearsOfExperience,
+                consultationFee: doctor.consultationFee,
+                bio: doctor.bio,
+                profilePicture: doctor.profilePicture,
+                qualifications: doctor.qualifications
+            })),
+            count: doctors.length
+        };
+    }
 }
 export default new DepartmentService();
