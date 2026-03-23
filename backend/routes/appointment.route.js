@@ -4,6 +4,8 @@ import {
     bookAppointment,
     getMyAppointments,
     getDoctorAppointments,
+    getAllAppointments,
+    getDashboardStats,
     updateAppointmentStatus,
     updateAppointment,
     cancelAppointment,
@@ -18,6 +20,12 @@ router.get('/my-appointments', getMyAppointments);
 
 // Get doctor's appointments 
 router.get('/doctor-appointments', getDoctorAppointments);
+
+// Admin: get all appointments
+router.get('/all', getAllAppointments);
+
+// Admin: dashboard stats (total patients, doctors, appointments)
+router.get('/stats', getDashboardStats);
 
 // Update appointment status 
 router.patch('/:appointmentId/status', updateAppointmentStatus);
