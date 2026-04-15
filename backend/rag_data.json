@@ -1,0 +1,302 @@
+[
+  {
+    "text": "A patient is experiencing chest pain, tight chest, shortness of breath. This may indicate Heart Attack. The patient should visit the Cardiology department.",
+    "disease": "Heart Attack",
+    "department": "Cardiology"
+  },
+  {
+    "text": "A patient is experiencing irregular heartbeat, palpitations, dizziness. This may indicate Arrhythmia. The patient should visit the Cardiology department.",
+    "disease": "Arrhythmia",
+    "department": "Cardiology"
+  },
+  {
+    "text": "A patient is experiencing high blood pressure, headache, vision problems. This may indicate Hypertension. The patient should visit the Cardiology department.",
+    "disease": "Hypertension",
+    "department": "Cardiology"
+  },
+  {
+    "text": "A patient is experiencing leg swelling, fatigue, shortness of breath. This may indicate Heart Failure. The patient should visit the Cardiology department.",
+    "disease": "Heart Failure",
+    "department": "Cardiology"
+  },
+  {
+    "text": "A patient is experiencing fever, cough, sore throat. This may indicate Flu. The patient should visit the General Medicine department.",
+    "disease": "Flu",
+    "department": "General Medicine"
+  },
+  {
+    "text": "A patient is experiencing high fever, chills, sweating. This may indicate Malaria. The patient should visit the General Medicine department.",
+    "disease": "Malaria",
+    "department": "General Medicine"
+  },
+  {
+    "text": "A patient is experiencing body ache, fatigue, mild fever. This may indicate Viral Infection. The patient should visit the General Medicine department.",
+    "disease": "Viral Infection",
+    "department": "General Medicine"
+  },
+  {
+    "text": "A patient is experiencing fever, rash, joint pain. This may indicate Dengue. The patient should visit the General Medicine department.",
+    "disease": "Dengue",
+    "department": "General Medicine"
+  },
+  {
+    "text": "A patient is experiencing headache, nausea, sensitivity to light. This may indicate Migraine. The patient should visit the Neurology department.",
+    "disease": "Migraine",
+    "department": "Neurology"
+  },
+  {
+    "text": "A patient is experiencing seizures, confusion, unconsciousness. This may indicate Epilepsy. The patient should visit the Neurology department.",
+    "disease": "Epilepsy",
+    "department": "Neurology"
+  },
+  {
+    "text": "A patient is experiencing memory loss, confusion, difficulty thinking. This may indicate Alzheimer's Disease. The patient should visit the Neurology department.",
+    "disease": "Alzheimer's Disease",
+    "department": "Neurology"
+  },
+  {
+    "text": "A patient is experiencing tremors, slow movement, stiffness. This may indicate Parkinson's Disease. The patient should visit the Neurology department.",
+    "disease": "Parkinson's Disease",
+    "department": "Neurology"
+  },
+  {
+    "text": "A patient is experiencing skin rash, itching, redness. This may indicate Allergy. The patient should visit the Dermatology department.",
+    "disease": "Allergy",
+    "department": "Dermatology"
+  },
+  {
+    "text": "A patient is experiencing acne, pimples, oily skin. This may indicate Acne. The patient should visit the Dermatology department.",
+    "disease": "Acne",
+    "department": "Dermatology"
+  },
+  {
+    "text": "A patient is experiencing dry skin, flaking, itching. This may indicate Eczema. The patient should visit the Dermatology department.",
+    "disease": "Eczema",
+    "department": "Dermatology"
+  },
+  {
+    "text": "A patient is experiencing red patches, thick skin, scaling. This may indicate Psoriasis. The patient should visit the Dermatology department.",
+    "disease": "Psoriasis",
+    "department": "Dermatology"
+  },
+  {
+    "text": "A patient is experiencing joint pain, swelling, stiffness. This may indicate Arthritis. The patient should visit the Orthopedics department.",
+    "disease": "Arthritis",
+    "department": "Orthopedics"
+  },
+  {
+    "text": "A patient is experiencing bone fracture, swelling, severe pain. This may indicate Fracture. The patient should visit the Orthopedics department.",
+    "disease": "Fracture",
+    "department": "Orthopedics"
+  },
+  {
+    "text": "A patient is experiencing back pain, stiffness, limited movement. This may indicate Spinal Disorder. The patient should visit the Orthopedics department.",
+    "disease": "Spinal Disorder",
+    "department": "Orthopedics"
+  },
+  {
+    "text": "A patient is experiencing knee pain, swelling, difficulty walking. This may indicate Knee Injury. The patient should visit the Orthopedics department.",
+    "disease": "Knee Injury",
+    "department": "Orthopedics"
+  },
+  {
+    "text": "A patient is experiencing abdominal pain, diarrhea, vomiting. This may indicate Gastroenteritis. The patient should visit the Gastroenterology department.",
+    "disease": "Gastroenteritis",
+    "department": "Gastroenterology"
+  },
+  {
+    "text": "A patient is experiencing heartburn, acid reflux, chest discomfort. This may indicate GERD. The patient should visit the Gastroenterology department.",
+    "disease": "GERD",
+    "department": "Gastroenterology"
+  },
+  {
+    "text": "A patient is experiencing bloating, abdominal pain, constipation. This may indicate IBS. The patient should visit the Gastroenterology department.",
+    "disease": "IBS",
+    "department": "Gastroenterology"
+  },
+  {
+    "text": "A patient is experiencing yellow skin, fatigue, nausea. This may indicate Hepatitis. The patient should visit the Gastroenterology department.",
+    "disease": "Hepatitis",
+    "department": "Gastroenterology"
+  },
+  {
+    "text": "A patient is experiencing frequent urination, burning sensation. This may indicate UTI. The patient should visit the Urology department.",
+    "disease": "UTI",
+    "department": "Urology"
+  },
+  {
+    "text": "A patient is experiencing kidney pain, nausea, blood in urine. This may indicate Kidney Stones. The patient should visit the Urology department.",
+    "disease": "Kidney Stones",
+    "department": "Urology"
+  },
+  {
+    "text": "A patient is experiencing difficulty urinating, weak stream. This may indicate Prostate Enlargement. The patient should visit the Urology department.",
+    "disease": "Prostate Enlargement",
+    "department": "Urology"
+  },
+  {
+    "text": "A patient is experiencing lower abdominal pain, urinary urgency. This may indicate Bladder Infection. The patient should visit the Urology department.",
+    "disease": "Bladder Infection",
+    "department": "Urology"
+  },
+  {
+    "text": "A patient is experiencing eye redness, itching, watery eyes. This may indicate Conjunctivitis. The patient should visit the Ophthalmology department.",
+    "disease": "Conjunctivitis",
+    "department": "Ophthalmology"
+  },
+  {
+    "text": "A patient is experiencing blurred vision, halos around lights. This may indicate Glaucoma. The patient should visit the Ophthalmology department.",
+    "disease": "Glaucoma",
+    "department": "Ophthalmology"
+  },
+  {
+    "text": "A patient is experiencing vision loss, floaters, flashes. This may indicate Retinal Detachment. The patient should visit the Ophthalmology department.",
+    "disease": "Retinal Detachment",
+    "department": "Ophthalmology"
+  },
+  {
+    "text": "A patient is experiencing cloudy vision, difficulty seeing at night. This may indicate Cataract. The patient should visit the Ophthalmology department.",
+    "disease": "Cataract",
+    "department": "Ophthalmology"
+  },
+  {
+    "text": "A patient is experiencing tooth pain, gum swelling, sensitivity. This may indicate Tooth Infection. The patient should visit the Dentistry department.",
+    "disease": "Tooth Infection",
+    "department": "Dentistry"
+  },
+  {
+    "text": "A patient is experiencing bleeding gums, bad breath. This may indicate Gingivitis. The patient should visit the Dentistry department.",
+    "disease": "Gingivitis",
+    "department": "Dentistry"
+  },
+  {
+    "text": "A patient is experiencing tooth decay, cavities, pain. This may indicate Dental Caries. The patient should visit the Dentistry department.",
+    "disease": "Dental Caries",
+    "department": "Dentistry"
+  },
+  {
+    "text": "A patient is experiencing jaw pain, clicking sound, difficulty chewing. This may indicate TMJ Disorder. The patient should visit the Dentistry department.",
+    "disease": "TMJ Disorder",
+    "department": "Dentistry"
+  },
+  {
+    "text": "A patient is experiencing ear pain, hearing loss, discharge. This may indicate Ear Infection. The patient should visit the ENT department.",
+    "disease": "Ear Infection",
+    "department": "ENT"
+  },
+  {
+    "text": "A patient is experiencing nasal congestion, sinus pressure, headache. This may indicate Sinusitis. The patient should visit the ENT department.",
+    "disease": "Sinusitis",
+    "department": "ENT"
+  },
+  {
+    "text": "A patient is experiencing sore throat, difficulty swallowing. This may indicate Tonsillitis. The patient should visit the ENT department.",
+    "disease": "Tonsillitis",
+    "department": "ENT"
+  },
+  {
+    "text": "A patient is experiencing voice hoarseness, throat irritation. This may indicate Laryngitis. The patient should visit the ENT department.",
+    "disease": "Laryngitis",
+    "department": "ENT"
+  },
+  {
+    "text": "A patient is experiencing weight loss, increased thirst, urination. This may indicate Diabetes. The patient should visit the Endocrinology department.",
+    "disease": "Diabetes",
+    "department": "Endocrinology"
+  },
+  {
+    "text": "A patient is experiencing fatigue, weight gain, cold intolerance. This may indicate Hypothyroidism. The patient should visit the Endocrinology department.",
+    "disease": "Hypothyroidism",
+    "department": "Endocrinology"
+  },
+  {
+    "text": "A patient is experiencing weight loss, heat intolerance, anxiety. This may indicate Hyperthyroidism. The patient should visit the Endocrinology department.",
+    "disease": "Hyperthyroidism",
+    "department": "Endocrinology"
+  },
+  {
+    "text": "A patient is experiencing growth issues, hormonal imbalance. This may indicate Hormonal Disorder. The patient should visit the Endocrinology department.",
+    "disease": "Hormonal Disorder",
+    "department": "Endocrinology"
+  },
+  {
+    "text": "A patient is experiencing persistent cough, chest pain, weight loss. This may indicate Tuberculosis. The patient should visit the Pulmonology department.",
+    "disease": "Tuberculosis",
+    "department": "Pulmonology"
+  },
+  {
+    "text": "A patient is experiencing shortness of breath, wheezing. This may indicate Asthma. The patient should visit the Pulmonology department.",
+    "disease": "Asthma",
+    "department": "Pulmonology"
+  },
+  {
+    "text": "A patient is experiencing chronic cough, mucus, fatigue. This may indicate Bronchitis. The patient should visit the Pulmonology department.",
+    "disease": "Bronchitis",
+    "department": "Pulmonology"
+  },
+  {
+    "text": "A patient is experiencing difficulty breathing, chest tightness. This may indicate COPD. The patient should visit the Pulmonology department.",
+    "disease": "COPD",
+    "department": "Pulmonology"
+  },
+  {
+    "text": "A patient is experiencing depression, sadness, loss of interest. This may indicate Depression. The patient should visit the Psychiatry department.",
+    "disease": "Depression",
+    "department": "Psychiatry"
+  },
+  {
+    "text": "A patient is experiencing anxiety, restlessness, rapid heartbeat. This may indicate Anxiety Disorder. The patient should visit the Psychiatry department.",
+    "disease": "Anxiety Disorder",
+    "department": "Psychiatry"
+  },
+  {
+    "text": "A patient is experiencing mood swings, extreme highs and lows. This may indicate Bipolar Disorder. The patient should visit the Psychiatry department.",
+    "disease": "Bipolar Disorder",
+    "department": "Psychiatry"
+  },
+  {
+    "text": "A patient is experiencing hallucinations, delusions, confusion. This may indicate Schizophrenia. The patient should visit the Psychiatry department.",
+    "disease": "Schizophrenia",
+    "department": "Psychiatry"
+  },
+  {
+    "text": "A patient is experiencing pregnancy, abdominal pain, missed periods. This may indicate Pregnancy. The patient should visit the Gynecology department.",
+    "disease": "Pregnancy",
+    "department": "Gynecology"
+  },
+  {
+    "text": "A patient is experiencing pelvic pain, irregular periods. This may indicate PCOS. The patient should visit the Gynecology department.",
+    "disease": "PCOS",
+    "department": "Gynecology"
+  },
+  {
+    "text": "A patient is experiencing heavy bleeding, cramps. This may indicate Menstrual Disorder. The patient should visit the Gynecology department.",
+    "disease": "Menstrual Disorder",
+    "department": "Gynecology"
+  },
+  {
+    "text": "A patient is experiencing vaginal discharge, itching. This may indicate Yeast Infection. The patient should visit the Gynecology department.",
+    "disease": "Yeast Infection",
+    "department": "Gynecology"
+  },
+  {
+    "text": "A patient is experiencing fever in child, irritability, crying. This may indicate Child Infection. The patient should visit the Pediatrics department.",
+    "disease": "Child Infection",
+    "department": "Pediatrics"
+  },
+  {
+    "text": "A patient is experiencing rash in child, fever, cough. This may indicate Measles. The patient should visit the Pediatrics department.",
+    "disease": "Measles",
+    "department": "Pediatrics"
+  },
+  {
+    "text": "A patient is experiencing runny nose, cough in child. This may indicate Common Cold. The patient should visit the Pediatrics department.",
+    "disease": "Common Cold",
+    "department": "Pediatrics"
+  },
+  {
+    "text": "A patient is experiencing diarrhea in child, dehydration. This may indicate Child Gastroenteritis. The patient should visit the Pediatrics department.",
+    "disease": "Child Gastroenteritis",
+    "department": "Pediatrics"
+  }
+]
