@@ -1,0 +1,124 @@
+[
+    {
+        "symptoms": "chest pain, tight chest, shortness of breath", 
+        "disease": "Heart Attack", 
+        "department": "Cardiology"
+    },
+    { 
+        "symptoms": "irregular heartbeat, palpitations, dizziness",
+        "disease": "Arrhythmia", 
+        "department": "Cardiology" 
+    },
+    { 
+        "symptoms": "high blood pressure, headache, vision problems", 
+        "disease": "Hypertension", 
+        "department": "Cardiology" 
+    },
+    { 
+        "symptoms": "leg swelling, fatigue, shortness of breath", 
+        "disease": "Heart Failure", 
+        "department": "Cardiology" 
+    },
+
+    { 
+        "symptoms": "fever, cough, sore throat", 
+        "disease": "Flu", 
+        "department": "General Medicine" 
+    },
+    { 
+        "symptoms": "high fever, chills, sweating", 
+        "disease": "Malaria", 
+        "department": "General Medicine" 
+    },
+    { 
+        "symptoms": "body ache, fatigue, mild fever", 
+        "disease": "Viral Infection", 
+        "department": "General Medicine" 
+    },
+    { 
+        "symptoms": "fever, rash, joint pain", 
+        "disease": "Dengue", 
+        "department": "General Medicine" 
+    },
+
+    { 
+        "symptoms": "headache, nausea, sensitivity to light", 
+        "disease": "Migraine", 
+        "department": "Neurology" 
+    },
+    { 
+        "symptoms": "seizures, confusion, unconsciousness", 
+        "disease": "Epilepsy", 
+        "department": "Neurology" 
+    },
+    { 
+        "symptoms": "memory loss, confusion, difficulty thinking", 
+        "disease": "Alzheimer's Disease", 
+        "department": "Neurology" 
+    },
+    { 
+        "symptoms": "tremors, slow movement, stiffness", 
+        "disease": "Parkinson's Disease", 
+        "department": "Neurology" 
+    },
+
+    { "symptoms": "skin rash, itching, redness", "disease": "Allergy", "department": "Dermatology" },
+    { "symptoms": "acne, pimples, oily skin", "disease": "Acne", "department": "Dermatology" },
+    { "symptoms": "dry skin, flaking, itching", "disease": "Eczema", "department": "Dermatology" },
+    { "symptoms": "red patches, thick skin, scaling", "disease": "Psoriasis", "department": "Dermatology" },
+
+    { "symptoms": "joint pain, swelling, stiffness", "disease": "Arthritis", "department": "Orthopedics" },
+    { "symptoms": "bone fracture, swelling, severe pain", "disease": "Fracture", "department": "Orthopedics" },
+    { "symptoms": "back pain, stiffness, limited movement", "disease": "Spinal Disorder", "department": "Orthopedics" },
+    { "symptoms": "knee pain, swelling, difficulty walking", "disease": "Knee Injury", "department": "Orthopedics" },
+
+    { "symptoms": "abdominal pain, diarrhea, vomiting", "disease": "Gastroenteritis", "department": "Gastroenterology" },
+    { "symptoms": "heartburn, acid reflux, chest discomfort", "disease": "GERD", "department": "Gastroenterology" },
+    { "symptoms": "bloating, abdominal pain, constipation", "disease": "IBS", "department": "Gastroenterology" },
+    { "symptoms": "yellow skin, fatigue, nausea", "disease": "Hepatitis", "department": "Gastroenterology" },
+
+    { "symptoms": "frequent urination, burning sensation", "disease": "UTI", "department": "Urology" },
+    { "symptoms": "kidney pain, nausea, blood in urine", "disease": "Kidney Stones", "department": "Urology" },
+    { "symptoms": "difficulty urinating, weak stream", "disease": "Prostate Enlargement", "department": "Urology" },
+    { "symptoms": "lower abdominal pain, urinary urgency", "disease": "Bladder Infection", "department": "Urology" },
+
+    { "symptoms": "eye redness, itching, watery eyes", "disease": "Conjunctivitis", "department": "Ophthalmology" },
+    { "symptoms": "blurred vision, halos around lights", "disease": "Glaucoma", "department": "Ophthalmology" },
+    { "symptoms": "vision loss, floaters, flashes", "disease": "Retinal Detachment", "department": "Ophthalmology" },
+    { "symptoms": "cloudy vision, difficulty seeing at night", "disease": "Cataract", "department": "Ophthalmology" },
+
+    { "symptoms": "tooth pain, gum swelling, sensitivity", "disease": "Tooth Infection", "department": "Dentistry" },
+    { "symptoms": "bleeding gums, bad breath", "disease": "Gingivitis", "department": "Dentistry" },
+    { "symptoms": "tooth decay, cavities, pain", "disease": "Dental Caries", "department": "Dentistry" },
+    { "symptoms": "jaw pain, clicking sound, difficulty chewing", "disease": "TMJ Disorder", "department": "Dentistry" },
+
+    { "symptoms": "ear pain, hearing loss, discharge", "disease": "Ear Infection", "department": "ENT" },
+    { "symptoms": "nasal congestion, sinus pressure, headache", "disease": "Sinusitis", "department": "ENT" },
+    { "symptoms": "sore throat, difficulty swallowing", "disease": "Tonsillitis", "department": "ENT" },
+    { "symptoms": "voice hoarseness, throat irritation", "disease": "Laryngitis", "department": "ENT" },
+
+    { "symptoms": "weight loss, increased thirst, urination", "disease": "Diabetes", "department": "Endocrinology" },
+    { "symptoms": "fatigue, weight gain, cold intolerance", "disease": "Hypothyroidism", "department": "Endocrinology" },
+    { "symptoms": "weight loss, heat intolerance, anxiety", "disease": "Hyperthyroidism", "department": "Endocrinology" },
+    { "symptoms": "growth issues, hormonal imbalance", "disease": "Hormonal Disorder", "department": "Endocrinology" },
+
+    { "symptoms": "persistent cough, chest pain, weight loss", "disease": "Tuberculosis", "department": "Pulmonology" },
+    { "symptoms": "shortness of breath, wheezing", "disease": "Asthma", "department": "Pulmonology" },
+    { "symptoms": "chronic cough, mucus, fatigue", "disease": "Bronchitis", "department": "Pulmonology" },
+    { "symptoms": "difficulty breathing, chest tightness", "disease": "COPD", "department": "Pulmonology" },
+
+    { "symptoms": "depression, sadness, loss of interest", "disease": "Depression", "department": "Psychiatry" },
+    { "symptoms": "anxiety, restlessness, rapid heartbeat", "disease": "Anxiety Disorder", "department": "Psychiatry" },
+    { "symptoms": "mood swings, extreme highs and lows", "disease": "Bipolar Disorder", "department": "Psychiatry" },
+    { "symptoms": "hallucinations, delusions, confusion", "disease": "Schizophrenia", "department": "Psychiatry" },
+
+    { "symptoms": "pregnancy, abdominal pain, missed periods", "disease": "Pregnancy", "department": "Gynecology" },
+    { "symptoms": "pelvic pain, irregular periods", "disease": "PCOS", "department": "Gynecology" },
+    { "symptoms": "heavy bleeding, cramps", "disease": "Menstrual Disorder", "department": "Gynecology" },
+    { "symptoms": "vaginal discharge, itching", "disease": "Yeast Infection", "department": "Gynecology" },
+
+    { "symptoms": "fever in child, irritability, crying", "disease": "Child Infection", "department": "Pediatrics" },
+    { "symptoms": "rash in child, fever, cough", "disease": "Measles", "department": "Pediatrics" },
+    { "symptoms": "runny nose, cough in child", "disease": "Common Cold", "department": "Pediatrics" },
+    { "symptoms": "diarrhea in child, dehydration", "disease": "Child Gastroenteritis", "department": "Pediatrics" }
+]
