@@ -6,8 +6,9 @@ import {
     sendAppointmentCancellationEmail,
     sendAppointmentRescheduledEmail 
 } from "../utils/emailService.js";
+import { maybeSendDayBeforeReminderImmediately } from "../appointmentDayBeforeReminderScheduler.js";
 
-// Helper function to verify JWT token and get user
+//To verify JWT token and get user
 const verifyToken = (authHeader) => {
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return null;
@@ -21,10 +22,10 @@ const verifyToken = (authHeader) => {
     }
 };
 
-// BOOK APPOINTMENT - Requires patient authentication
+// Book Appointment, it requires patient authentication
 export async function bookAppointment(req, res) {
     try {
-        // Verify patient is logged in
+        // Verify if patient is logged in
         const decoded = verifyToken(req.headers.authorization);
         if (!decoded || !decoded.userId) {
             return res.status(401).json({ 
@@ -116,6 +117,8 @@ export async function bookAppointment(req, res) {
             }
         }
 
+        void maybeSendDayBeforeReminderImmediately(appointment._id);
+
         res.status(201).json({
             message: "Appointment booked successfully",
             appointment: {
@@ -148,10 +151,10 @@ export async function bookAppointment(req, res) {
     }
 }
 
-// GET PATIENT'S APPOINTMENTS 
+// Get patients appointments 
 export async function getMyAppointments(req, res) {
     try {
-        // Verify patient is logged in
+        // Verify if the patient is logged in
         const decoded = verifyToken(req.headers.authorization);
         if (!decoded || !decoded.userId) {
             return res.status(401).json({ 
@@ -190,7 +193,7 @@ export async function getMyAppointments(req, res) {
     }
 }
 
-// GET DOCTOR'S APPOINTMENTS - Enhanced with filtering, pagination, and search
+// Get doctors appointment, enhanced with filtering, pagination, and search
 export async function getDoctorAppointments(req, res) {
     try {
         // Verify doctor is logged in
@@ -248,10 +251,8 @@ export async function getDoctorAppointments(req, res) {
             }
         }
 
-        // Search filter (patient name, email, username)
+        // Search filter by patient name, email, username
         if (search) {
-            // We'll need to search in populated patient fields
-            // First, find matching patients
             const matchingPatients = await User.find({
                 role: "patient",
                 $or: [
@@ -266,12 +267,11 @@ export async function getDoctorAppointments(req, res) {
             if (patientIds.length > 0) {
                 filter.patient = { $in: patientIds };
             } else {
-                // No matching patients, return empty result
                 filter.patient = { $in: [] };
             }
         }
 
-        // Calculate pagination
+        // Pagination
         const pageNumber = parseInt(page) || 1;
         const limitNumber = parseInt(limit) || 10;
         const skip = (pageNumber - 1) * limitNumber;
@@ -348,7 +348,133 @@ export async function getDoctorAppointments(req, res) {
     }
 }
 
-// UPDATE APPOINTMENT STATUS 
+// Get all appointment, for admin
+export async function getAllAppointments(req, res) {
+    try {
+        const decoded = verifyToken(req.headers.authorization);
+        if (!decoded || !decoded.userId) {
+            return res.status(401).json({ message: "Authentication required." });
+        }
+
+        const admin = await User.findById(decoded.userId);
+        if (!admin || admin.role !== "admin") {
+            return res.status(403).json({ message: "Only admins can view all appointments." });
+        }
+
+        const {
+            status,
+            page = '1',
+            limit = '100',
+            sortBy = 'appointmentDate',
+            sortOrder = 'desc'
+        } = req.query;
+
+        const filter = {};
+        if (status && ["pending", "confirmed", "cancelled", "completed"].includes(status)) {
+            filter.status = status;
+        }
+
+        const pageNumber = parseInt(page) || 1;
+        const limitNumber = Math.min(parseInt(limit) || 100, 500);
+        const skip = (pageNumber - 1) * limitNumber;
+
+        const sort = {};
+        const validSortFields = ['appointmentDate', 'appointmentTime', 'status', 'createdAt', 'updatedAt'];
+        const sortField = validSortFields.includes(sortBy) ? sortBy : 'appointmentDate';
+        sort[sortField] = sortOrder === 'desc' ? -1 : 1;
+        if (sortField === 'appointmentDate') {
+            sort.appointmentTime = sortOrder === 'desc' ? -1 : 1;
+        }
+
+        const totalAppointments = await Appointment.countDocuments(filter);
+
+        const appointments = await Appointment.find(filter)
+            .populate('patient', 'username email firstName lastName phoneNumber')
+            .populate('doctor', 'username email firstName lastName specialization department')
+            .sort(sort)
+            .skip(skip)
+            .limit(limitNumber);
+
+        const formattedAppointments = appointments.map(apt => ({
+            id: apt._id,
+            patient: apt.patient ? {
+                id: apt.patient._id,
+                username: apt.patient.username,
+                email: apt.patient.email,
+                name: `${apt.patient.firstName || ''} ${apt.patient.lastName || ''}`.trim() || apt.patient.username,
+                phoneNumber: apt.patient.phoneNumber
+            } : null,
+            doctor: apt.doctor ? {
+                id: apt.doctor._id,
+                username: apt.doctor.username,
+                email: apt.doctor.email,
+                name: `${apt.doctor.firstName || ''} ${apt.doctor.lastName || ''}`.trim() || apt.doctor.username,
+                specialization: apt.doctor.specialization,
+                department: apt.doctor.department
+            } : null,
+            appointmentDate: apt.appointmentDate,
+            appointmentTime: apt.appointmentTime,
+            reason: apt.reason,
+            status: apt.status,
+            notes: apt.notes,
+            createdAt: apt.createdAt,
+            updatedAt: apt.updatedAt
+        }));
+
+        const totalPages = Math.ceil(totalAppointments / limitNumber);
+
+        res.status(200).json({
+            message: "Appointments retrieved successfully",
+            appointments: formattedAppointments,
+            pagination: {
+                currentPage: pageNumber,
+                totalPages,
+                totalAppointments,
+                appointmentsPerPage: limitNumber,
+                hasNextPage: pageNumber < totalPages,
+                hasPrevPage: pageNumber > 1
+            }
+        });
+    } catch (err) {
+        console.log("Get all appointments error:", err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+}
+
+// For admin dashboard statistics
+export async function getDashboardStats(req, res) {
+    try {
+        const decoded = verifyToken(req.headers.authorization);
+        if (!decoded || !decoded.userId) {
+            return res.status(401).json({ message: "Authentication required." });
+        }
+
+        const admin = await User.findById(decoded.userId);
+        if (!admin || admin.role !== "admin") {
+            return res.status(403).json({ message: "Only admins can view dashboard stats." });
+        }
+
+        const [totalPatients, totalDoctors, totalAppointments] = await Promise.all([
+            User.countDocuments({ role: 'patient' }),
+            User.countDocuments({ role: 'doctor' }),
+            Appointment.countDocuments({})
+        ]);
+
+        res.status(200).json({
+            message: "Dashboard stats retrieved successfully",
+            stats: {
+                totalPatients,
+                totalDoctors,
+                totalAppointments
+            }
+        });
+    } catch (err) {
+        console.log("Get dashboard stats error:", err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+}
+
+// Update Appointment Status 
 export async function updateAppointmentStatus(req, res) {
     try {
         const decoded = verifyToken(req.headers.authorization);
@@ -384,8 +510,8 @@ export async function updateAppointmentStatus(req, res) {
             });
         }
 
-        // Only doctors or admins can confirm or complete appointments
-        if ((status === "confirmed" || status === "completed") && user.role !== "doctor" && user.role !== "admin") {
+        // Only doctors  can confirm or complete appointments
+        if ((status === "confirmed" || status === "completed") && user.role !== "doctor") {
             return res.status(403).json({ 
                 message: "Only doctors can confirm or complete appointments" 
             });
@@ -441,7 +567,7 @@ export async function updateAppointmentStatus(req, res) {
     }
 }
 
-// UPDATE APPOINTMENT - Update any appointment fields (date, time, reason, notes, status)
+// Updtae Appointments
 export async function updateAppointment(req, res) {
     try {
         const decoded = verifyToken(req.headers.authorization);
@@ -568,7 +694,15 @@ export async function updateAppointment(req, res) {
             appointment.status = "pending";
         }
 
+        if (dateTimeChanged) {
+            appointment.dayBeforeReminderSentAt = null;
+        }
+
         await appointment.save();
+
+        if (dateTimeChanged) {
+            void maybeSendDayBeforeReminderImmediately(appointment._id);
+        }
 
         // Send email notifications
         if (dateTimeChanged && appointment.patient.email) {
@@ -644,7 +778,7 @@ export async function updateAppointment(req, res) {
     }
 }
 
-// CANCEL APPOINTMENT 
+// Cancel appointmnet 
 export async function cancelAppointment(req, res) {
     try {
         const decoded = verifyToken(req.headers.authorization);
@@ -652,7 +786,7 @@ export async function cancelAppointment(req, res) {
             return res.status(401).json({ message: "Authentication required." });
         }
 
-        // Get appointmentId from params (URL) or body
+        // Get appointmentId from params or body
         const appointmentId = req.params.appointmentId || req.body.appointmentId;
         
         if (!appointmentId) {
@@ -755,7 +889,7 @@ export async function cancelAppointment(req, res) {
     }
 }
 
-// RESCHEDULE APPOINTMENT - Requires patient or doctor authentication
+// Reschedule appointment
 export async function rescheduleAppointment(req, res) {
     try {
         const decoded = verifyToken(req.headers.authorization);
@@ -841,7 +975,10 @@ export async function rescheduleAppointment(req, res) {
         if (appointment.status === "confirmed") {
             appointment.status = "pending";
         }
+        appointment.dayBeforeReminderSentAt = null;
         await appointment.save();
+
+        void maybeSendDayBeforeReminderImmediately(appointment._id);
 
         // Determine who rescheduled
         const rescheduledBy = user.role === "patient" 
