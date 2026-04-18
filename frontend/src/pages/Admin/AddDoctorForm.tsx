@@ -21,6 +21,8 @@ interface AddDoctorFormData {
   qualifications: string;
   experience: string;
   licenseNumber: string;
+  /** Whole rupees, e.g. 1500 */
+  consultationFee: string;
   availability: Record<string, { available: boolean; startTime: string; endTime: string }>;
 }
 
@@ -52,6 +54,7 @@ export default function AddDoctorForm() {
     qualifications:'',
     experience:'',
     licenseNumber:'',
+    consultationFee: '',
     availability: defaultAvailability(),
   });
   const [error, setError] = useState<string>('');
@@ -93,6 +96,12 @@ export default function AddDoctorForm() {
     if (formData.password !== formData.confirmPassword) return setErrorAndReturn('Passwords do not match');
     if (!formData.specialty.trim()) return setErrorAndReturn('Specialty is required');
     if (!formData.department.trim()) return setErrorAndReturn('Department is required');
+    const feeRaw = formData.consultationFee.trim();
+    if (!feeRaw) return setErrorAndReturn('Consultation fee (Rs.) is required');
+    const fee = parseFloat(feeRaw);
+    if (Number.isNaN(fee) || fee < 0) {
+      return setErrorAndReturn('Enter a valid consultation fee in Rs. (0 or greater)');
+    }
     return true;
   };
 
@@ -138,6 +147,7 @@ export default function AddDoctorForm() {
         qualifications: formData.qualifications,
         yearsOfExperience: formData.experience ? parseInt(formData.experience, 10) : undefined,
         licenseNumber: formData.licenseNumber,
+        consultationFee: parseFloat(formData.consultationFee.trim()) || 0,
         availability: availabilityPayload,
       })) as RegisterResponse;
 
@@ -266,6 +276,23 @@ export default function AddDoctorForm() {
               placeholder="Enter license number"
               required
             />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="consultationFee">Consultation fee (Rs.)</label>
+            <input
+              type="number"
+              id="consultationFee"
+              name="consultationFee"
+              value={formData.consultationFee}
+              onChange={handleChange}
+              placeholder="e.g., 1500"
+              min={0}
+              step={1}
+              inputMode="decimal"
+              required
+            />
+            <p className="form-hint-inline">Fee per consultation in Nepalese Rupees (Rs.).</p>
           </div>
 
           <div className="form-group availability-section">
