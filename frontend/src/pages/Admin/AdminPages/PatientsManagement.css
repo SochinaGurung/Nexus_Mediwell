@@ -1,0 +1,49 @@
+/* PatientsManagement - same palette as doctor/patient (main styles in AdminDashboard.css) */
+.patients-table thead {
+  background: #eaf2f7;
+}
+
+.patients-table th {
+  border-bottom: 1px solid #d8e3ec;
+  color: #666;
+}
+
+.patients-table td {
+  border-bottom: 1px solid #d8e3ec;
+  color: #1e2a32;
+}
+
+.patients-table tbody tr:hover {
+  background: #eaf2f7;
+}
+
+/* Modal overrides - rest from AdminDashboard.css */
+.modal-content {
+  border-radius: 16px;
+  border: 1px solid #d8e3ec;
+}
+
+.modal-header {
+  border-bottom: 1px solid #d8e3ec;
+}
+
+.modal-header h3 {
+  color: #1e2a32;
+}
+
+.close-btn:hover {
+  background: #eaf2f7;
+  color: #2C5F7C;
+}
+
+.detail-row {
+  border-bottom: 1px solid #d8e3ec;
+}
+
+.detail-row strong {
+  color: #666;
+}
+
+.detail-row span {
+  color: #1e2a32;
+}

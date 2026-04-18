@@ -1,6 +1,73 @@
 import Appointment from "../models/appointment.model.js";
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+
+/** Monday 00:00:00 UTC for the week containing `d` */
+function startOfMondayUTC(d) {
+    const x = new Date(d);
+    const day = x.getUTCDay();
+    const daysFromMonday = (day + 6) % 7;
+    x.setUTCDate(x.getUTCDate() - daysFromMonday);
+    x.setUTCHours(0, 0, 0, 0);
+    return x;
+}
+
+function getWeekBucketStarts(count) {
+    const currentMonday = startOfMondayUTC(new Date());
+    const buckets = [];
+    for (let i = 0; i < count; i++) {
+        const ws = new Date(currentMonday);
+        ws.setUTCDate(ws.getUTCDate() - (count - 1 - i) * 7);
+        buckets.push(ws);
+    }
+    return buckets;
+}
+
+function formatWeekLabel(start) {
+    const end = new Date(start);
+    end.setUTCDate(end.getUTCDate() + 6);
+    const opts = { month: "short", day: "numeric", timeZone: "UTC" };
+    return `${start.toLocaleDateString("en-US", opts)} – ${end.toLocaleDateString("en-US", opts)}`;
+}
+
+function getMonthBucketStarts(count) {
+    const now = new Date();
+    const buckets = [];
+    for (let i = 0; i < count; i++) {
+        const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (count - 1 - i), 1));
+        buckets.push(d);
+    }
+    return buckets;
+}
+
+function formatMonthLabel(d) {
+    return d.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+}
+
+async function weeklySeries(Model, dateField, extraFilter, weekStarts) {
+    return Promise.all(
+        weekStarts.map((start) => {
+            const end = new Date(start);
+            end.setUTCDate(end.getUTCDate() + 7);
+            return Model.countDocuments({
+                ...extraFilter,
+                [dateField]: { $gte: start, $lt: end },
+            });
+        })
+    );
+}
+
+async function monthlySeries(Model, dateField, extraFilter, monthStarts) {
+    return Promise.all(
+        monthStarts.map((start) => {
+            const next = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 1));
+            return Model.countDocuments({
+                ...extraFilter,
+                [dateField]: { $gte: start, $lt: next },
+            });
+        })
+    );
+}
 import { 
     sendAppointmentConfirmationEmail, 
     sendAppointmentCancellationEmail,
@@ -454,19 +521,58 @@ export async function getDashboardStats(req, res) {
             return res.status(403).json({ message: "Only admins can view dashboard stats." });
         }
 
-        const [totalPatients, totalDoctors, totalAppointments] = await Promise.all([
-            User.countDocuments({ role: 'patient' }),
-            User.countDocuments({ role: 'doctor' }),
-            Appointment.countDocuments({})
+        const portalUserRoles = { role: { $in: ["patient", "doctor"] } };
+
+        const weekStarts = getWeekBucketStarts(8);
+        const monthStarts = getMonthBucketStarts(6);
+
+        const [
+            totalPatients,
+            totalDoctors,
+            totalAppointments,
+            apptWeeklyCounts,
+            apptMonthlyCounts,
+            regWeeklyCounts,
+            regMonthlyCounts,
+        ] = await Promise.all([
+            User.countDocuments({ role: "patient" }),
+            User.countDocuments({ role: "doctor" }),
+            Appointment.countDocuments({}),
+            weeklySeries(Appointment, "appointmentDate", {}, weekStarts),
+            monthlySeries(Appointment, "appointmentDate", {}, monthStarts),
+            weeklySeries(User, "createdAt", portalUserRoles, weekStarts),
+            monthlySeries(User, "createdAt", portalUserRoles, monthStarts),
         ]);
+
+        const appointmentsWeekly = weekStarts.map((start, i) => ({
+            label: formatWeekLabel(start),
+            count: apptWeeklyCounts[i],
+        }));
+        const appointmentsMonthly = monthStarts.map((start, i) => ({
+            label: formatMonthLabel(start),
+            count: apptMonthlyCounts[i],
+        }));
+        const registrationsWeekly = weekStarts.map((start, i) => ({
+            label: formatWeekLabel(start),
+            count: regWeeklyCounts[i],
+        }));
+        const registrationsMonthly = monthStarts.map((start, i) => ({
+            label: formatMonthLabel(start),
+            count: regMonthlyCounts[i],
+        }));
 
         res.status(200).json({
             message: "Dashboard stats retrieved successfully",
             stats: {
                 totalPatients,
                 totalDoctors,
-                totalAppointments
-            }
+                totalAppointments,
+                totalRegisteredUsers: totalPatients + totalDoctors,
+                appointmentsWeekly,
+                appointmentsMonthly,
+                registrationsWeekly,
+                registrationsMonthly,
+            },
         });
     } catch (err) {
         console.log("Get dashboard stats error:", err);
