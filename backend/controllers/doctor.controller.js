@@ -1,15 +1,14 @@
 import doctorService from "../services/doctor.service.js";
 import { protect, allowRoles } from "../middleware/auth.middleware.js";
 
-/**
- * GET ALL DOCTORS - Public (anyone can view)
- */
+ //Get all doctors
 export async function getAllDoctors(req, res) {
     try {
         const filters = {
             department: req.query.department,
             specialization: req.query.specialization,
-            search: req.query.search
+            search: req.query.search,
+            includeInactive: req.user?.role === "admin",
         };
         
         const result = await doctorService.getAllDoctors(filters);
@@ -27,9 +26,7 @@ export async function getAllDoctors(req, res) {
     }
 }
 
-/**
- * GET DOCTOR BY ID - Public
- */
+//Get Doctr by  Id
 export async function getDoctorById(req, res) {
     try {
         const { id } = req.params;
@@ -48,9 +45,8 @@ export async function getDoctorById(req, res) {
     }
 }
 
-/**
- * UPDATE DOCTOR PROFILE - Doctor only (can update own profile) or Admin
- */
+
+//To update Doctor Profile (only dcotor can do it)  
 export async function updateDoctorProfile(req, res) {
     try {
         const { id } = req.params;
@@ -117,9 +113,6 @@ export async function updateAvailability(req, res) {
     }
 }
 
-/**
- * SET DOCTOR STATUS - Admin only
- */
 export async function setDoctorStatus(req, res) {
     try {
         const { id } = req.params;

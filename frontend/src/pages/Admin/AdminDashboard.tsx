@@ -1,16 +1,32 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ComponentType } from 'react'
 import { useNavigate, useLocation, Routes, Route, Link, Navigate } from 'react-router-dom'
 import { authService } from '../../services/authService'
 import './AdminDashboard.css'
 
-// Importing all the page components
-//import DashboardOverview from './pages/DashboardOverview'
+import DashboardOverview from './AdminPages/DashboardOverview'
 import DoctorsManagement from './AdminPages/DoctorsManagement'
 import PatientsManagement from './AdminPages/PatientsManagement'
 import DepartmentsManagement from './AdminPages/DepartmentsManagement'
 import AppointmentsManagement from './AdminPages/AppointmentsManagement'
+import FeedbackManagement from './AdminPages/FeedbackManagement'
+import MedicalRecordsManagement from './AdminPages/MedicalRecordsManagement'
+import {
+  NavIconAppointments,
+  NavIconDashboard,
+  NavIconDepartments,
+  NavIconDoctors,
+  NavIconFeedback,
+  NavIconLogout,
+  NavIconMedicalRecords,
+  NavIconPatients,
+  NavIconReports,
+} from './AdminNavIcons'
 
-import ActivityLogs from './AdminPages/ActivityLogs'
+type MenuItem = {
+  path: string
+  label: string
+  Icon: ComponentType
+}
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
@@ -48,16 +64,15 @@ const AdminDashboard = () => {
     navigate('/')
   }
 
-  const menuItems = [
-    { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
-    { path: '/admin/doctors', label: 'Doctors', icon: '👨‍⚕️' },
-    { path: '/admin/patients', label: 'Patients', icon: '👥' },
-    { path: '/admin/departments', label: 'Departments', icon: '🏥' },
-    { path: '/admin/appointments', label: 'Appointments', icon: '📅' },
-    { path: '/admin/reports', label: 'Reports & Analytics', icon: '📈' },
-    { path: '/admin/medical-records', label: 'Medical Records Logs', icon: '📋' },
-    { path: '/admin/settings', label: 'System Settings', icon: '⚙️' },
-    { path: '/admin/activity-logs', label: 'Activity Logs', icon: '📝' },
+  const menuItems: MenuItem[] = [
+    { path: '/admin/dashboard', label: 'Dashboard', Icon: NavIconDashboard },
+    { path: '/admin/doctors', label: 'Doctors', Icon: NavIconDoctors },
+    { path: '/admin/patients', label: 'Patients', Icon: NavIconPatients },
+    { path: '/admin/departments', label: 'Departments', Icon: NavIconDepartments },
+    { path: '/admin/appointments', label: 'Appointments', Icon: NavIconAppointments },
+    { path: '/admin/reports', label: 'Reports & Analytics', Icon: NavIconReports },
+    { path: '/admin/medical-records', label: 'Medical Records Logs', Icon: NavIconMedicalRecords },
+    { path: '/admin/feedback', label: 'Feedback', Icon: NavIconFeedback },
   ]
 
   const isActiveRoute = (path: string) => {
@@ -74,7 +89,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-      {/* Sidebar */}
+      {/* For Sidebar */}
       <aside className={`admin-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           <div className="logo-section">
@@ -117,23 +132,30 @@ const AdminDashboard = () => {
 
         {/* Navigation Menu */}
         <nav className="sidebar-nav">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`nav-item ${isActiveRoute(item.path) ? 'active' : ''}`}
-              title={sidebarCollapsed ? item.label : ''}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              {!sidebarCollapsed && <span className="nav-label">{item.label}</span>}
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const Icon = item.Icon
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`nav-item ${isActiveRoute(item.path) ? 'active' : ''}`}
+                title={sidebarCollapsed ? item.label : ''}
+              >
+                <span className="nav-icon">
+                  <Icon />
+                </span>
+                {!sidebarCollapsed && <span className="nav-label">{item.label}</span>}
+              </Link>
+            )
+          })}
         </nav>
 
         {/* Logout Button */}
         <div className="sidebar-footer">
-          <button className="logout-btn" onClick={handleLogout}>
-            <span className="nav-icon">🚪</span>
+          <button type="button" className="logout-btn" onClick={handleLogout}>
+            <span className="nav-icon">
+              <NavIconLogout />
+            </span>
             {!sidebarCollapsed && <span>Logout</span>}
           </button>
         </div>
@@ -147,26 +169,6 @@ const AdminDashboard = () => {
           </h1>
           
           <div className="header-actions">
-            <div className="global-search">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M9 17C13.4183 17 17 13.4183 17 9C17 4.58172 13.4183 1 9 1C4.58172 1 1 4.58172 1 9C1 13.4183 4.58172 17 9 17Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M19 19L14.65 14.65"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <input type="text" placeholder="Search..." />
-            </div>
-
             {/* Admin Profile Dropdown */}
             <div className="admin-dropdown">
               <button className="admin-profile-btn">
@@ -180,9 +182,7 @@ const AdminDashboard = () => {
                   )}
                 </div>
                 <span>{adminName}</span>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
+                
               </button>
             </div>
           </div>
@@ -191,12 +191,14 @@ const AdminDashboard = () => {
         {/* Page Contents */}
         <main className="admin-content">
           <Routes>
+            <Route path="" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<DashboardOverview />} />
             <Route path="doctors" element={<DoctorsManagement />} />
             <Route path="patients" element={<PatientsManagement />} />
             <Route path="departments" element={<DepartmentsManagement />} />
             <Route path="appointments" element={<AppointmentsManagement />} />
-            <Route path="activity-logs" element={<ActivityLogs />} />
-            <Route path="" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="medical-records" element={<MedicalRecordsManagement />} />
+            <Route path="feedback" element={<FeedbackManagement />} />
             <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
           </Routes>
         </main>

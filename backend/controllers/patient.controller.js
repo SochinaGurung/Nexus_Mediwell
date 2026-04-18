@@ -1,12 +1,19 @@
 import patientService from '../services/patient.service.js';
 
-/**
- * ADD MEDICAL RECORD TO PATIENT - Doctor only
- */
+//ADD MEDICAL RECORD TO PATIENT 
+
 export async function addMedicalRecord(req, res) {
     try {
         const { patientId } = req.params;
-        const { condition, diagnosisDate, notes } = req.body;
+        const {
+            condition,
+            diagnosisDate,
+            symptoms,
+            prescription,
+            notes,
+            followUpInstructions,
+            testRecommendations
+        } = req.body;
         const doctorId = req.user?.userId;
 
         if (!doctorId) {
@@ -17,7 +24,15 @@ export async function addMedicalRecord(req, res) {
 
         const result = await patientService.addMedicalRecord(
             patientId,
-            { condition, diagnosisDate, notes },
+            {
+                condition,
+                diagnosisDate,
+                symptoms,
+                prescription,
+                notes,
+                followUpInstructions,
+                testRecommendations
+            },
             doctorId
         );
 
@@ -37,7 +52,7 @@ export async function addMedicalRecord(req, res) {
 }
 
 /**
- * UPDATE PATIENT ALLERGIES (Only Doctor can do it ) 
+ * UPDATE PATIENT ALLERGIES 
  */
 export async function updatePatientAllergies(req, res) {
     try {
@@ -71,6 +86,7 @@ export async function updatePatientAllergies(req, res) {
         });
     }
 }
+
 //SEARCH PATIENTS
 export async function searchPatients(req, res) {
     try {

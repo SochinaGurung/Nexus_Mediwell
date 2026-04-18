@@ -1,0 +1,41 @@
+/* AppointmentsManagement - same palette as doctor/patient (main styles in AdminDashboard.css) */
+
+/* Patients per doctor section */
+.appointments-patients-per-doctor {
+  margin-bottom: 28px;
+}
+
+.appointments-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e2a32;
+  margin: 0 0 6px 0;
+}
+
+.appointments-section-desc {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 14px 0;
+}
+
+.doctor-patient-count-table td strong {
+  color: #2C5F7C;
+}
+
+.appointments-table thead {
+  background: #eaf2f7;
+}
+
+.appointments-table th {
+  border-bottom: 1px solid #d8e3ec;
+  color: #666;
+}
+
+.appointments-table td {
+  border-bottom: 1px solid #d8e3ec;
+  color: #1e2a32;
+}
+
+.appointments-table tbody tr:hover {
+  background: #eaf2f7;
+}

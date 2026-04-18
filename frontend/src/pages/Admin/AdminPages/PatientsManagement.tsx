@@ -75,7 +75,7 @@ const PatientsManagement = () => {
         <div className="search-bar">
           <input
             type="search"
-            placeholder="Search by name, username, or email — press Enter"
+            placeholder="Search by name, username, or email"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={(e) => {

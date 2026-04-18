@@ -19,7 +19,7 @@ export async function getAllDepartments(req, res) {
     }
 }
 
-// GET SINGLE DEPARTMENT (for everyone)
+// GET SINGLE DEPARTMENT for everyone
 export async function getDepartmentById(req, res) {
     try {
         const { id } = req.params;
