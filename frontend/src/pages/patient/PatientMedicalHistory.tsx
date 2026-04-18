@@ -8,7 +8,11 @@ import './PatientMedicalHistory.css'
 interface MedicalHistoryEntry {
   condition: string
   diagnosisDate?: string
+  symptoms?: string
+  prescription?: string
   notes?: string
+  followUpInstructions?: string
+  testRecommendations?: string
 }
 
 export default function PatientMedicalHistory() {
@@ -77,7 +81,36 @@ export default function PatientMedicalHistory() {
                       <span className="patient-medical-date">{formatDate(entry.diagnosisDate)}</span>
                     )}
                   </div>
-                  {entry.notes && <p className="patient-medical-notes">{entry.notes}</p>}
+                  {entry.symptoms && (
+                    <div className="patient-medical-row">
+                      <span className="patient-medical-label">Symptoms:</span>
+                      <span>{entry.symptoms}</span>
+                    </div>
+                  )}
+                  {entry.prescription && (
+                    <div className="patient-medical-row">
+                      <span className="patient-medical-label">Prescription / medicines:</span>
+                      <span>{entry.prescription}</span>
+                    </div>
+                  )}
+                  {entry.notes && (
+                    <div className="patient-medical-row">
+                      <span className="patient-medical-label">Doctor notes:</span>
+                      <span>{entry.notes}</span>
+                    </div>
+                  )}
+                  {entry.followUpInstructions && (
+                    <div className="patient-medical-row">
+                      <span className="patient-medical-label">Follow-up:</span>
+                      <span>{entry.followUpInstructions}</span>
+                    </div>
+                  )}
+                  {entry.testRecommendations && (
+                    <div className="patient-medical-row">
+                      <span className="patient-medical-label">Test recommendations:</span>
+                      <span>{entry.testRecommendations}</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

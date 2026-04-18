@@ -237,3 +237,59 @@
   background: var(--bg-secondary);
   color: var(--text-primary);
 }
+
+/* Profile photo (Cloudinary) */
+.profile-photo-section .form-hint {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.profile-photo-error {
+  margin-bottom: 12px;
+}
+
+.profile-photo-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.profile-photo-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--border-color);
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.profile-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 8px;
+}
+
+.profile-photo-file-label {
+  cursor: pointer;
+  display: inline-block;
+  margin: 0;
+}
+
+.profile-photo-file-label:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

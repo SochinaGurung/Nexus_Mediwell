@@ -1,0 +1,75 @@
+.patient-meds-panel { display: grid; gap: 16px; }
+.patient-meds-panel h1 { margin: 0; font-size: 1.75rem; color: #1e2a32; }
+.patient-meds-panel--embedded { gap: 12px; }
+.patient-meds-card { background: #fff; border: 1px solid #d8e3ec; border-radius: 14px; padding: 16px; }
+.patient-meds-card h2 { margin: 0 0 12px; color: #1e2a32; }
+.patient-meds-card input, .patient-meds-card select, .patient-meds-card textarea { width: 100%; padding: 10px; border: 1px solid #d8e3ec; border-radius: 8px; margin: 6px 0 10px; }
+.patient-meds-card button { background: #2C5F7C; color: #fff; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+.patient-meds-card .danger { background: #ef4444; }
+.inline-actions { display: flex; gap: 8px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.time-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.tag { background: #eaf2f7 !important; color: #2C5F7C !important; border: 1px solid #d8e3ec !important; }
+.patient-meds-table-wrap { overflow-x: auto; }
+.patient-meds-table { width: 100%; border-collapse: collapse; }
+.patient-meds-table th, .patient-meds-table td { padding: 10px; border-bottom: 1px solid #d8e3ec; text-align: left; }
+.patient-meds-table th { background: #eaf2f7; color: #666; }
+.error-text { color: #ef4444; }
+.success-text { color: #16a34a; }
+.muted { color: #666; }
+
+.patient-meds-instructions-cell {
+  max-width: 280px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.patient-meds-lead {
+  margin: -4px 0 14px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.patient-meds-reminder-form label {
+  display: block;
+  font-size: 0.9rem;
+  color: #1e2a32;
+  font-weight: 500;
+}
+
+.required-star {
+  color: #ef4444;
+}
+
+.med-suggest-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem 1rem;
+}
+
+@media (max-width: 520px) {
+  .med-suggest-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.patient-meds-date-row {
+  margin-bottom: 4px;
+}
+
+.patient-meds-primary-btn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 12px 16px !important;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.patient-meds-delete-btn {
+  white-space: nowrap;
+  padding: 6px 10px !important;
+  font-size: 13px;
+}

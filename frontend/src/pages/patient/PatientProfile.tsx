@@ -40,7 +40,11 @@ interface PatientProfile {
   medicalHistory?: Array<{
     condition: string
     diagnosisDate?: string
+    symptoms?: string
+    prescription?: string
     notes?: string
+    followUpInstructions?: string
+    testRecommendations?: string
   }>
   createdAt?: string
   updatedAt?: string
@@ -197,9 +201,14 @@ export default function PatientProfile() {
                 <h1>{fullName}</h1>
                 <p className="profile-username">@{profile.username}</p>
                 <p className="profile-email">{profile.email}</p>
-                <Link to="/patient/profile/edit" className="edit-profile-btn">
-                  Edit Profile
-                </Link>
+                <div className="profile-header-actions">
+                  <Link to="/patient/dashboard" className="dashboard-btn">
+                    Back to Dashboard
+                  </Link>
+                  <Link to="/patient/profile/edit" className="edit-profile-btn">
+                    Edit Profile
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -433,8 +442,35 @@ export default function PatientProfile() {
                           </span>
                         )}
                       </div>
+                      {history.symptoms && (
+                        <div className="history-row">
+                          <span className="history-label">Symptoms:</span>
+                          <span>{history.symptoms}</span>
+                        </div>
+                      )}
+                      {history.prescription && (
+                        <div className="history-row">
+                          <span className="history-label">Prescription / medicines:</span>
+                          <span>{history.prescription}</span>
+                        </div>
+                      )}
                       {history.notes && (
-                        <p className="history-notes">{history.notes}</p>
+                        <div className="history-row">
+                          <span className="history-label">Doctor notes:</span>
+                          <span>{history.notes}</span>
+                        </div>
+                      )}
+                      {history.followUpInstructions && (
+                        <div className="history-row">
+                          <span className="history-label">Follow-up:</span>
+                          <span>{history.followUpInstructions}</span>
+                        </div>
+                      )}
+                      {history.testRecommendations && (
+                        <div className="history-row">
+                          <span className="history-label">Test recommendations:</span>
+                          <span>{history.testRecommendations}</span>
+                        </div>
                       )}
                     </div>
                   ))}
@@ -447,39 +483,6 @@ export default function PatientProfile() {
                 <p className="no-medical-info">No medical information available.</p>
               )}
           </div>
-
-          {/* Insurance Information */}
-          {profile.insuranceInfo && (
-            <div className="profile-section">
-              <h2>Insurance Information</h2>
-              <div className="info-grid">
-                {profile.insuranceInfo.provider && (
-                  <div className="info-item">
-                    <strong>Provider</strong>
-                    <p>{profile.insuranceInfo.provider}</p>
-                  </div>
-                )}
-                {profile.insuranceInfo.policyNumber && (
-                  <div className="info-item">
-                    <strong>Policy Number</strong>
-                    <p>{profile.insuranceInfo.policyNumber}</p>
-                  </div>
-                )}
-                {profile.insuranceInfo.groupNumber && (
-                  <div className="info-item">
-                    <strong>Group Number</strong>
-                    <p>{profile.insuranceInfo.groupNumber}</p>
-                  </div>
-                )}
-                {profile.insuranceInfo.expiryDate && (
-                  <div className="info-item">
-                    <strong>Expiry Date</strong>
-                    <p>{formatDate(profile.insuranceInfo.expiryDate)}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Account Information */}
           <div className="profile-section">

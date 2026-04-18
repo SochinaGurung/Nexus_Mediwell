@@ -2,10 +2,15 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authService } from '../../services/authService'
 import { appointmentService } from '../../services/appointmentService'
+import { chatService } from '../../services/chatService'
 import type { Appointment } from '../../services/appointmentService'
+import PatientMedicineReminderPanel from './PatientMedicineReminderPanel'
+import { useMedicineReminderUi } from '../../contexts/MedicineReminderNotificationContext'
+import { PatientMedicineNotificationBell } from '../../contexts/PatientMedicineNotificationBell'
 import './PatientHome.css'
 
 const Home = () => {
+  const { dueNotifications, openReminderById } = useMedicineReminderUi()
   const currentUser = authService.getCurrentUser()
   const displayName = currentUser?.username || localStorage.getItem('username') || 'Patient'
   const navigate = useNavigate()
@@ -19,6 +24,8 @@ const Home = () => {
   const [rescheduleReason, setRescheduleReason] = useState('')
   const [rescheduleSubmitting, setRescheduleSubmitting] = useState(false)
   const [rescheduleError, setRescheduleError] = useState('')
+  const [chatUnreadCount, setChatUnreadCount] = useState(0)
+  const [medicineModalOpen, setMedicineModalOpen] = useState(false)
 
   useEffect(() => {
     if (!authService.isAuthenticated()) {
@@ -31,6 +38,7 @@ const Home = () => {
       return
     }
     loadAppointments()
+    chatService.getUnreadCount().then((r) => setChatUnreadCount(r.total)).catch(() => {})
   }, [navigate])
 
   async function loadAppointments() {
@@ -134,7 +142,6 @@ const Home = () => {
 
   return (
     <div className="patient-dashboard patient-layout">
-      {/* Left sidebar - same structure as doctor dashboard */}
       <aside className="patient-sidebar">
         <div className="patient-sidebar-logo">
           <div className="patient-sidebar-logo-icon">
@@ -175,7 +182,32 @@ const Home = () => {
             </span>
             <span>Browse Doctors</span>
           </Link>
+          <Link to="/patient/chat" className="patient-nav-item patient-nav-item-badge">
+            <span className="patient-nav-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </span>
+            <span>Messages</span>
+            {chatUnreadCount > 0 && <span className="patient-nav-badge">{chatUnreadCount}</span>}
+          </Link>
+          <button
+            type="button"
+            className="patient-nav-item patient-nav-item-badge"
+            onClick={() => setMedicineModalOpen(true)}
+          >
+            <span className="patient-nav-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10.5 20.5L3.5 13.5a3.5 3.5 0 1 1 5-5l7 7a3.5 3.5 0 1 1-5 5z" />
+                <path d="M9 9l6 6" />
+              </svg>
+            </span>
+            <span>Medicines</span>
+          </button>
+          <PatientMedicineNotificationBell />
+
         </nav>
+
         <nav className="patient-sidebar-nav patient-sidebar-profile">
           <div className="patient-nav-heading">Profile</div>
           <Link to="/patient/profile" className="patient-nav-item">
@@ -286,6 +318,41 @@ const Home = () => {
                   <p className="patient-category-label">Medical History</p>
                   <span className="patient-category-desc">View your records</span>
                 </Link>
+                <button
+                  type="button"
+                  className="patient-category-card patient-category-teal"
+                  onClick={() => setMedicineModalOpen(true)}
+                >
+                  <span className="patient-category-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M10.5 20.5L3.5 13.5a3.5 3.5 0 1 1 5-5l7 7a3.5 3.5 0 1 1-5 5z" />
+                      <path d="M9 9l6 6" />
+                    </svg>
+                  </span>
+                  <p className="patient-category-label">Medicines & Reminders</p>
+                  <span className="patient-category-desc">See medicines and set reminder</span>
+                </button>
+              </div>
+
+              <div className="patient-reminder-num-strip" aria-label="Medicine reminder alerts">
+                <span className="patient-reminder-num-strip-label">Reminders</span>
+                <div className="patient-reminder-num-badges">
+                  {dueNotifications.length === 0 ? (
+                    <span className="patient-reminder-num-empty">No alerts right now</span>
+                  ) : (
+                    dueNotifications.map((n, index) => (
+                      <button
+                        key={n._id}
+                        type="button"
+                        className="patient-reminder-num-badge"
+                        onClick={() => openReminderById(n._id)}
+                        title={`Open reminder ${index + 1}`}
+                      >
+                        {index + 1}
+                      </button>
+                    ))
+                  )}
+                </div>
               </div>
             </section>
 
@@ -354,6 +421,36 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+      {medicineModalOpen && (
+        <div
+          className="patient-meds-modal-backdrop"
+          role="presentation"
+          onClick={() => setMedicineModalOpen(false)}
+        >
+          <div
+            className="patient-meds-modal"
+            role="dialog"
+            aria-labelledby="patient-meds-modal-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="patient-meds-modal-header">
+              <h2 id="patient-meds-modal-title">Medicines &amp; reminders</h2>
+              <button
+                type="button"
+                className="patient-meds-modal-close"
+                aria-label="Close"
+                onClick={() => setMedicineModalOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="patient-meds-modal-body">
+              <PatientMedicineReminderPanel embedded />
+            </div>
+          </div>
+        </div>
+      )}
 
       {rescheduleApt && (
         <div className="patient-reschedule-backdrop" onClick={closeReschedule}>

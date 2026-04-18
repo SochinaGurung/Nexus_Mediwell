@@ -90,6 +90,21 @@
   margin: 0;
 }
 
+.patient-medical-row {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.patient-medical-row .patient-medical-label {
+  display: inline-block;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 11rem;
+  margin-right: 4px;
+}
+
 .patient-medical-history-page .loading-container {
   display: flex;
   flex-direction: column;

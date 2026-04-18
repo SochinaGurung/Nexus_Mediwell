@@ -39,6 +39,9 @@ export default function EditPatientProfile() {
     medicalHistory: []
   })
   const [allergyInput, setAllergyInput] = useState('')
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
+  const [photoUploading, setPhotoUploading] = useState(false)
+  const [photoError, setPhotoError] = useState('')
 
   useEffect(() => {
     if (!authService.isAuthenticated()) {
@@ -58,7 +61,8 @@ export default function EditPatientProfile() {
       setLoading(true)
       setError('')
       const res = await authService.getProfile()
-      const u = res.user as ProfileData & { address?: ProfileData['address']; emergencyContact?: ProfileData['emergencyContact']; insuranceInfo?: ProfileData['insuranceInfo']; medicalHistory?: ProfileData['medicalHistory'] }
+      const u = res.user as ProfileData & { address?: ProfileData['address']; emergencyContact?: ProfileData['emergencyContact']; insuranceInfo?: ProfileData['insuranceInfo']; medicalHistory?: ProfileData['medicalHistory']; profilePicture?: string }
+      setProfilePictureUrl(u.profilePicture ?? null)
       setForm({
         firstName: u.firstName ?? '',
         lastName: u.lastName ?? '',
@@ -114,6 +118,26 @@ export default function EditPatientProfile() {
     setForm((prev) => ({ ...prev, medicalHistory: prev.medicalHistory?.filter((_, i) => i !== idx) || [] }))
   }
 
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError('Image must be 5MB or smaller.')
+      return
+    }
+    setPhotoError('')
+    setPhotoUploading(true)
+    try {
+      const res = await authService.uploadProfilePhoto(file)
+      setProfilePictureUrl(res.profilePicture)
+    } catch (err: unknown) {
+      setPhotoError((err as { message?: string })?.message || 'Upload failed')
+    } finally {
+      setPhotoUploading(false)
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -164,6 +188,32 @@ export default function EditPatientProfile() {
           </div>
           {error && <div className="profile-edit-error">{error}</div>}
           <form onSubmit={handleSubmit} className="profile-edit-form">
+            <section className="profile-edit-section profile-photo-section">
+              <h2>Profile photo</h2>
+              <p className="form-hint">Upload your Profile Picture.</p>
+              {photoError ? <div className="profile-edit-error profile-photo-error">{photoError}</div> : null}
+              <div className="profile-photo-upload-row">
+                <div className="profile-photo-preview">
+                  {profilePictureUrl ? (
+                    <img src={profilePictureUrl} alt="Your profile" />
+                  ) : (
+                    <div className="profile-photo-placeholder">No photo</div>
+                  )}
+                </div>
+                <div className="profile-photo-actions">
+                  <label className="btn-secondary profile-photo-file-label">
+                    {photoUploading ? 'Uploading…' : 'Choose photo'}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      onChange={handlePhotoChange}
+                      disabled={photoUploading}
+                      hidden
+                    />
+                  </label>
+                </div>
+              </div>
+            </section>
             <section className="profile-edit-section">
               <h2>Personal Information</h2>
               <div className="form-row">
@@ -203,14 +253,7 @@ export default function EditPatientProfile() {
                   <label>City</label>
                   <input value={form.address?.city ?? ''} onChange={(e) => update('address.city', e.target.value)} placeholder="City" />
                 </div>
-                <div className="form-group">
-                  <label>State</label>
-                  <input value={form.address?.state ?? ''} onChange={(e) => update('address.state', e.target.value)} placeholder="State" />
-                </div>
-                <div className="form-group">
-                  <label>Zip Code</label>
-                  <input value={form.address?.zipCode ?? ''} onChange={(e) => update('address.zipCode', e.target.value)} placeholder="Zip" />
-                </div>
+                
               </div>
               <div className="form-group">
                 <label>Country</label>
@@ -258,28 +301,6 @@ export default function EditPatientProfile() {
                     <span key={i} className="tag"><span>{a}</span><button type="button" onClick={() => removeAllergy(i)} aria-label="Remove">×</button></span>
                   ))}
                 </div>
-              </div>
-            </section>
-
-            <section className="profile-edit-section">
-              <h2>Insurance Information</h2>
-              <div className="form-group">
-                <label>Provider</label>
-                <input value={form.insuranceInfo?.provider ?? ''} onChange={(e) => update('insuranceInfo.provider', e.target.value)} placeholder="Insurance provider" />
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Policy Number</label>
-                  <input value={form.insuranceInfo?.policyNumber ?? ''} onChange={(e) => update('insuranceInfo.policyNumber', e.target.value)} placeholder="Policy number" />
-                </div>
-                <div className="form-group">
-                  <label>Group Number</label>
-                  <input value={form.insuranceInfo?.groupNumber ?? ''} onChange={(e) => update('insuranceInfo.groupNumber', e.target.value)} placeholder="Group number" />
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Expiry Date</label>
-                <input type="date" value={form.insuranceInfo?.expiryDate ?? ''} onChange={(e) => update('insuranceInfo.expiryDate', e.target.value)} />
               </div>
             </section>
 
