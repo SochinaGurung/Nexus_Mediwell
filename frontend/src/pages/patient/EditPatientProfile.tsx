@@ -6,18 +6,33 @@ import { authService } from '../../services/authService'
 import './PatientProfile.css'
 import './EditPatientProfile.css'
 
+/** Kept in form state so profile save does not strip doctor-linked fields from the API */
+type MedicalHistoryFormEntry = {
+    _id?: string
+    condition: string
+    diagnosisDate?: string
+    notes?: string
+    doctorId?: string
+    /** From API for display; omitted on save (recomputed server-side) */
+    doctorName?: string | null
+    symptoms?: string
+    prescription?: string
+    followUpInstructions?: string
+    testRecommendations?: string
+}
+
 interface ProfileData {
-  firstName?: string
-  lastName?: string
-  phoneNumber?: string
-  address?: { street?: string; city?: string; state?: string; zipCode?: string; country?: string }
-  dateOfBirth?: string
-  gender?: string
-  bloodGroup?: string
-  emergencyContact?: { name?: string; relationship?: string; phoneNumber?: string; email?: string }
-  allergies?: string[]
-  insuranceInfo?: { provider?: string; policyNumber?: string; groupNumber?: string; expiryDate?: string }
-  medicalHistory?: Array<{ condition: string; diagnosisDate?: string; notes?: string }>
+    firstName?: string
+    lastName?: string
+    phoneNumber?: string
+    address?: { street?: string; city?: string; state?: string; zipCode?: string; country?: string }
+    dateOfBirth?: string
+    gender?: string
+    bloodGroup?: string
+    emergencyContact?: { name?: string; relationship?: string; phoneNumber?: string; email?: string }
+    allergies?: string[]
+    insuranceInfo?: { provider?: string; policyNumber?: string; groupNumber?: string; expiryDate?: string }
+    medicalHistory?: MedicalHistoryFormEntry[]
 }
 
 export default function EditPatientProfile() {
@@ -61,7 +76,13 @@ export default function EditPatientProfile() {
       setLoading(true)
       setError('')
       const res = await authService.getProfile()
-      const u = res.user as ProfileData & { address?: ProfileData['address']; emergencyContact?: ProfileData['emergencyContact']; insuranceInfo?: ProfileData['insuranceInfo']; medicalHistory?: ProfileData['medicalHistory']; profilePicture?: string }
+      const u = res.user as ProfileData & {
+        address?: ProfileData['address']
+        emergencyContact?: ProfileData['emergencyContact']
+        insuranceInfo?: ProfileData['insuranceInfo']
+        medicalHistory?: Record<string, unknown>[]
+        profilePicture?: string
+      }
       setProfilePictureUrl(u.profilePicture ?? null)
       setForm({
         firstName: u.firstName ?? '',
@@ -74,7 +95,28 @@ export default function EditPatientProfile() {
         emergencyContact: u.emergencyContact ? { ...{ name: '', relationship: '', phoneNumber: '', email: '' }, ...u.emergencyContact } : { name: '', relationship: '', phoneNumber: '', email: '' },
         allergies: Array.isArray(u.allergies) ? [...u.allergies] : [],
         insuranceInfo: u.insuranceInfo ? { ...{ provider: '', policyNumber: '', groupNumber: '', expiryDate: '' }, ...u.insuranceInfo, expiryDate: (u.insuranceInfo as { expiryDate?: string })?.expiryDate ? String((u.insuranceInfo as { expiryDate?: string }).expiryDate).slice(0, 10) : '' } : { provider: '', policyNumber: '', groupNumber: '', expiryDate: '' },
-        medicalHistory: Array.isArray(u.medicalHistory) ? u.medicalHistory.map((m: { condition?: string; diagnosisDate?: string; notes?: string }) => ({ condition: m.condition ?? '', diagnosisDate: m.diagnosisDate ? String(m.diagnosisDate).slice(0, 10) : '', notes: m.notes ?? '' })) : []
+        medicalHistory: Array.isArray(u.medicalHistory)
+          ? u.medicalHistory.map((m) => {
+              const row = m as Record<string, unknown>
+              const id = row._id != null ? String(row._id) : undefined
+              const docId = row.doctorId != null ? String(row.doctorId) : undefined
+              const displayName = row.doctorName != null && String(row.doctorName).trim() !== ''
+                ? String(row.doctorName)
+                : undefined
+              return {
+                ...(id ? { _id: id } : {}),
+                condition: String(row.condition ?? ''),
+                diagnosisDate: row.diagnosisDate ? String(row.diagnosisDate).slice(0, 10) : '',
+                notes: String(row.notes ?? ''),
+                ...(docId ? { doctorId: docId } : {}),
+                ...(displayName ? { doctorName: displayName } : {}),
+                symptoms: String(row.symptoms ?? ''),
+                prescription: String(row.prescription ?? ''),
+                followUpInstructions: String(row.followUpInstructions ?? ''),
+                testRecommendations: String(row.testRecommendations ?? ''),
+              } satisfies MedicalHistoryFormEntry
+            })
+          : []
       })
     } catch (err: unknown) {
       setError((err as { message?: string })?.message || 'Failed to load profile')
@@ -306,9 +348,18 @@ export default function EditPatientProfile() {
 
             <section className="profile-edit-section">
               <h2>Medical History</h2>
-              <p className="form-hint">Add conditions, diagnosis date and notes.</p>
+              <p className="form-hint">
+                Add conditions, diagnosis date and notes. Entries from your doctor stay linked to them when you save.
+              </p>
               {form.medicalHistory?.map((entry, idx) => (
-                <div key={idx} className="repeatable-block">
+                <div key={entry._id ?? `new-${idx}`} className="repeatable-block">
+                  {entry.doctorId || entry.doctorName ? (
+                    <p className="form-hint profile-doctor-entry-hint">
+                      {entry.doctorName
+                        ? `Recorded by ${entry.doctorName}. Prescription and related details stay on file when you save.`
+                        : 'Added by your doctor — prescription and related details are preserved when you save this profile.'}
+                    </p>
+                  ) : null}
                   <div className="form-row">
                     <div className="form-group flex-1">
                       <label>Condition</label>

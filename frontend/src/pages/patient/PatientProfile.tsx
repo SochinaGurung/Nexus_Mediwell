@@ -38,6 +38,7 @@ interface PatientProfile {
     expiryDate?: string
   }
   medicalHistory?: Array<{
+    _id?: string
     condition: string
     diagnosisDate?: string
     symptoms?: string
@@ -45,6 +46,7 @@ interface PatientProfile {
     notes?: string
     followUpInstructions?: string
     testRecommendations?: string
+    doctorName?: string | null
   }>
   createdAt?: string
   updatedAt?: string
@@ -433,7 +435,7 @@ export default function PatientProfile() {
                 <h3>Medical History</h3>
                 <div className="medical-history-list">
                   {profile.medicalHistory.map((history, idx) => (
-                    <div key={idx} className="history-item">
+                    <div key={history._id ?? idx} className="history-item">
                       <div className="history-header">
                         <strong>{history.condition}</strong>
                         {history.diagnosisDate && (
@@ -442,6 +444,12 @@ export default function PatientProfile() {
                           </span>
                         )}
                       </div>
+                      {history.doctorName ? (
+                        <div className="history-row history-recorded-by">
+                          <span className="history-label">Recorded by:</span>
+                          <span>{history.doctorName}</span>
+                        </div>
+                      ) : null}
                       {history.symptoms && (
                         <div className="history-row">
                           <span className="history-label">Symptoms:</span>

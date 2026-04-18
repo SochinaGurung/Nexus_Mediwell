@@ -13,6 +13,7 @@ interface MedicalHistoryEntry {
   notes?: string
   followUpInstructions?: string
   testRecommendations?: string
+  doctorName?: string | null
 }
 
 export default function PatientMedicalHistory() {
@@ -81,6 +82,12 @@ export default function PatientMedicalHistory() {
                       <span className="patient-medical-date">{formatDate(entry.diagnosisDate)}</span>
                     )}
                   </div>
+                  {entry.doctorName ? (
+                    <div className="patient-medical-row patient-medical-recorded-by">
+                      <span className="patient-medical-label">Recorded by:</span>
+                      <span>{entry.doctorName}</span>
+                    </div>
+                  ) : null}
                   {entry.symptoms && (
                     <div className="patient-medical-row">
                       <span className="patient-medical-label">Symptoms:</span>
