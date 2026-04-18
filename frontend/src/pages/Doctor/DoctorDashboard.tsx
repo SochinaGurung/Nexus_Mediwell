@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { authService } from '../../services/authService'
 import { appointmentService } from '../../services/appointmentService'
+import { chatService } from '../../services/chatService'
 import type { Appointment } from '../../services/appointmentService'
 import './DoctorDashboard.css'
 
@@ -15,6 +16,9 @@ export default function DoctorDashboard() {
   const [appointmentsError, setAppointmentsError] = useState('')
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
+  const [statusUpdateLoading, setStatusUpdateLoading] = useState(false)
+  const [statusUpdateError, setStatusUpdateError] = useState('')
+  const [chatUnreadCount, setChatUnreadCount] = useState(0)
 
   useEffect(() => {
     if (!selectedAppointment) return
@@ -36,6 +40,7 @@ export default function DoctorDashboard() {
       return
     }
     loadAppointments()
+    chatService.getUnreadCount().then((r) => setChatUnreadCount(r.total)).catch(() => {})
   }, [navigate])
 
   useEffect(() => {
@@ -91,6 +96,36 @@ export default function DoctorDashboard() {
     navigate('/')
   }
 
+  async function handleStatusChange(newStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed') {
+    if (!selectedAppointment || selectedAppointment.status === newStatus) return
+    setStatusUpdateError('')
+    setStatusUpdateLoading(true)
+    try {
+      await appointmentService.updateAppointmentStatus(selectedAppointment.id, newStatus)
+      setSelectedAppointment((prev) => prev ? { ...prev, status: newStatus } : null)
+      setAppointments((prev) =>
+        prev.map((a) => (a.id === selectedAppointment.id ? { ...a, status: newStatus } : a))
+      )
+    } catch (err: unknown) {
+      const msg = (err as { message?: string })?.message || 'Failed to update status'
+      setStatusUpdateError(msg)
+    } finally {
+      setStatusUpdateLoading(false)
+    }
+  }
+
+  function goToAddDiagnostics() {
+    if (!selectedAppointment?.patient?.id) return
+    navigate('/doctor/manage-records', {
+      state: {
+        patientId: selectedAppointment.patient.id,
+        appointmentId: selectedAppointment.id,
+        patientName: selectedAppointment.patient?.name || selectedAppointment.patient?.username
+      }
+    })
+    setSelectedAppointment(null)
+  }
+
   const pendingCount = appointments.filter((a) => a.status === 'pending').length
 
   return (
@@ -119,14 +154,7 @@ export default function DoctorDashboard() {
             </span>
             <span>Dashboard</span>
           </Link>
-          <Link to="/doctors" className="doc-nav-item">
-            <span className="doc-nav-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-            </span>
-            <span>Top Doctors</span>
-          </Link>
+          
           <Link to="/doctor/dashboard#appointments" className="doc-nav-item doc-nav-item-badge">
             <span className="doc-nav-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -139,14 +167,15 @@ export default function DoctorDashboard() {
             <span>Appointment</span>
             {pendingCount > 0 && <span className="doc-badge">{pendingCount}</span>}
           </Link>
-          <div className="doc-nav-item doc-nav-item-disabled">
+          <Link to="/doctor/chat" className="doc-nav-item doc-nav-item-badge">
             <span className="doc-nav-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </span>
             <span>Messages</span>
-          </div>
+            {chatUnreadCount > 0 && <span className="doc-badge">{chatUnreadCount}</span>}
+          </Link>
           <Link to="/doctor/manage-records" className="doc-nav-item">
             <span className="doc-nav-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -253,7 +282,7 @@ export default function DoctorDashboard() {
                       <line x1="16" y1="17" x2="8" y2="17" />
                     </svg>
                   </span>
-                  <span className="doc-category-label">Profile & Availability</span>
+                  <p className="doc-category-label">Profile & Availability</p>
                   <span className="doc-category-desc">Edit your profile</span>
                 </Link>
                 <Link to="/doctors" className="doc-category-card doc-category-orange">
@@ -262,7 +291,7 @@ export default function DoctorDashboard() {
                       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                     </svg>
                   </span>
-                  <span className="doc-category-label">Browse Doctors</span>
+                  <p className="doc-category-label">Browse Doctors</p>
                   <span className="doc-category-desc">View colleagues</span>
                 </Link>
               </div>
@@ -346,36 +375,70 @@ export default function DoctorDashboard() {
             </div>
             <div className="doc-appointment-modal-body">
               <div className="doc-appointment-modal-row">
-                <span className="doc-appointment-modal-label">Patient</span>
+                <span className="doc-appointment-modal-label">Patient: </span>
                 <span>{selectedAppointment.patient?.name || selectedAppointment.patient?.username || '—'}</span>
               </div>
               {selectedAppointment.patient?.email && (
                 <div className="doc-appointment-modal-row">
-                  <span className="doc-appointment-modal-label">Email</span>
+                  <span className="doc-appointment-modal-label">Email: </span>
                   <span>{selectedAppointment.patient.email}</span>
                 </div>
               )}
               <div className="doc-appointment-modal-row">
-                <span className="doc-appointment-modal-label">Date</span>
+                <span className="doc-appointment-modal-label">Date: </span>
                 <span>{formatShortDate(selectedAppointment.appointmentDate)}</span>
               </div>
               <div className="doc-appointment-modal-row">
-                <span className="doc-appointment-modal-label">Time</span>
+                <span className="doc-appointment-modal-label">Time: </span>
                 <span>{selectedAppointment.appointmentTime}</span>
               </div>
-              <div className="doc-appointment-modal-row">
-                <span className="doc-appointment-modal-label">Status</span>
+              <div className="doc-appointment-modal-row doc-appointment-modal-row-status">
+                <span className="doc-appointment-modal-label">Status: </span>
                 <span className={`doc-appointment-status ${getStatusClass(selectedAppointment.status)}`}>{selectedAppointment.status}</span>
+                {(selectedAppointment.status === 'pending' || selectedAppointment.status === 'confirmed') && (
+                  <div className="doc-appointment-status-actions">
+                    {selectedAppointment.status === 'pending' && (
+                      <button
+                        type="button"
+                        className="doc-appointment-status-btn doc-appointment-status-btn-confirm"
+                        onClick={() => handleStatusChange('confirmed')}
+                        disabled={statusUpdateLoading}
+                      >
+                        Confirm
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="doc-appointment-status-btn doc-appointment-status-btn-complete"
+                      onClick={() => handleStatusChange('completed')}
+                      disabled={statusUpdateLoading}
+                    >
+                      {statusUpdateLoading ? 'Updating…' : 'Mark completed'}
+                    </button>
+                  </div>
+                )}
+              </div>
+              {statusUpdateError && (
+                <p className="doc-appointment-modal-error">{statusUpdateError}</p>
+              )}
+              <div className="doc-appointment-modal-actions">
+                <button
+                  type="button"
+                  className="doc-appointment-add-diagnostics-btn"
+                  onClick={goToAddDiagnostics}
+                >
+                  Add diagnostics / medical record
+                </button>
               </div>
               {selectedAppointment.reason && (
                 <div className="doc-appointment-modal-row">
-                  <span className="doc-appointment-modal-label">Reason</span>
+                  <span className="doc-appointment-modal-label">Reason: </span>
                   <span>{selectedAppointment.reason}</span>
                 </div>
               )}
               {selectedAppointment.notes && (
                 <div className="doc-appointment-modal-row">
-                  <span className="doc-appointment-modal-label">Notes</span>
+                  <span className="doc-appointment-modal-label">Notes: </span>
                   <span>{selectedAppointment.notes}</span>
                 </div>
               )}
