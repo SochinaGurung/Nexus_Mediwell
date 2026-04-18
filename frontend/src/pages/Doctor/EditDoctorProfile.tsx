@@ -36,6 +36,9 @@ export default function EditDoctorProfile() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
+  const [photoUploading, setPhotoUploading] = useState(false)
+  const [photoError, setPhotoError] = useState('')
   const [form, setForm] = useState<ProfileData>({
     firstName: '',
     lastName: '',
@@ -75,7 +78,9 @@ export default function EditDoctorProfile() {
         address?: ProfileData['address']
         availability?: ProfileData['availability']
         qualifications?: ProfileData['qualifications']
+        profilePicture?: string
       }
+      setProfilePictureUrl(u.profilePicture ?? null)
       if ((u as { role?: string }).role !== 'doctor') {
         setError('Access denied.')
         setLoading(false)
@@ -159,6 +164,26 @@ export default function EditDoctorProfile() {
     }))
   }
 
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError('Image must be 5MB or smaller.')
+      return
+    }
+    setPhotoError('')
+    setPhotoUploading(true)
+    try {
+      const res = await authService.uploadProfilePhoto(file)
+      setProfilePictureUrl(res.profilePicture)
+    } catch (err: unknown) {
+      setPhotoError((err as { message?: string })?.message || 'Upload failed')
+    } finally {
+      setPhotoUploading(false)
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -227,6 +252,32 @@ export default function EditDoctorProfile() {
           </div>
           {error && <div className="profile-edit-error">{error}</div>}
           <form onSubmit={handleSubmit} className="profile-edit-form">
+            <section className="profile-edit-section profile-photo-section">
+              <h2>Profile photo</h2>
+              <p className="form-hint">Upload your Profile Picture.</p>
+              {photoError ? <div className="profile-edit-error profile-photo-error">{photoError}</div> : null}
+              <div className="profile-photo-upload-row">
+                <div className="profile-photo-preview">
+                  {profilePictureUrl ? (
+                    <img src={profilePictureUrl} alt="Your profile" />
+                  ) : (
+                    <div className="profile-photo-placeholder">No photo</div>
+                  )}
+                </div>
+                <div className="profile-photo-actions">
+                  <label className="btn-secondary profile-photo-file-label">
+                    {photoUploading ? 'Uploading…' : 'Choose photo'}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      onChange={handlePhotoChange}
+                      disabled={photoUploading}
+                      hidden
+                    />
+                  </label>
+                </div>
+              </div>
+            </section>
             <section className="profile-edit-section">
               <h2>Personal Information</h2>
               <div className="form-row">
