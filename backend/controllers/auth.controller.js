@@ -13,7 +13,7 @@ const resolveMx = promisify(dns.resolveMx);
 //  REGISTER FUNCTION
 export async function register(req, res) {
     try {
-        const { username, password, email, role, specialty, specialization, department, qualifications, yearsOfExperience, licenseNumber, consultationFee } = req.body;
+        const { username, password, email, role, specialty, specialization, department, qualifications, yearsOfExperience, licenseNumber, consultationFee, availability } = req.body;
         if (!username || !password || !email) {
             return res.status(400).json({ 
                 message: 'Username, password, and email are required' 
@@ -163,6 +163,21 @@ export async function register(req, res) {
                         institution: '',
                         year: undefined
                     }];
+                }
+            }
+            // Add availability if provided (admin setting doctor schedule)
+            if (availability && typeof availability === 'object') {
+                const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                userData.availability = {};
+                for (const day of days) {
+                    const dayData = availability[day];
+                    if (dayData && typeof dayData === 'object') {
+                        userData.availability[day] = {
+                            available: !!dayData.available,
+                            startTime: dayData.startTime && String(dayData.startTime).trim() ? String(dayData.startTime).trim() : undefined,
+                            endTime: dayData.endTime && String(dayData.endTime).trim() ? String(dayData.endTime).trim() : undefined
+                        };
+                    }
                 }
             }
         }

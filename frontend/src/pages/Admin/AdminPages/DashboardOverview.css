@@ -1,0 +1,98 @@
+/* Dashboard overview - same palette as admin/doctor/patient */
+.dashboard-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dashboard-overview-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e2a32;
+  margin: 0 0 4px 0;
+}
+
+.dashboard-overview-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 8px 0;
+}
+
+.dashboard-stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.dashboard-stat-card {
+  background: #ffffff;
+  border: 1px solid #d8e3ec;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: box-shadow 0.2s ease;
+}
+
+.dashboard-stat-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(44, 95, 124, 0.08);
+  color: #2C5F7C;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dashboard-stat-card-doctors .dashboard-stat-icon {
+  background: rgba(33, 74, 96, 0.1);
+  color: #214a60;
+}
+
+.dashboard-stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dashboard-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e2a32;
+  line-height: 1.2;
+}
+
+.dashboard-stat-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.dashboard-stat-card-patients .dashboard-stat-value { color: #2C5F7C; }
+.dashboard-stat-card-doctors .dashboard-stat-value { color: #214a60; }
+.dashboard-stat-card-appointments .dashboard-stat-value { color: #2C5F7C; }
+
+.dashboard-overview-loading,
+.dashboard-overview-error {
+  padding: 40px 20px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.dashboard-overview-error {
+  color: #ef4444;
+}
+
+@media (max-width: 600px) {
+  .dashboard-stats-cards {
+    grid-template-columns: 1fr;
+  }
+}
