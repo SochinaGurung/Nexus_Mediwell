@@ -147,7 +147,7 @@ const DoctorsManagement = () => {
                   </td>
                   <td>{doctor.specialization || 'N/A'}</td>
                   <td>{doctor.department || 'N/A'}</td>
-                  <td>${doctor.consultationFee || 0}</td>
+                  <td>Rs. {Number(doctor.consultationFee ?? 0).toLocaleString()}</td>
                   <td>
                     <span className={`status-badge status-${doctor.isActive ? 'active' : 'inactive'}`}>
                       {doctor.isActive ? 'Active' : 'Inactive'}

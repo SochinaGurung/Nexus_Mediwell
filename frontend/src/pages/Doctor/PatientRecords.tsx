@@ -534,6 +534,12 @@ export default function ManagePatientRecords() {
                         <span className="history-date">{formatDate(history.diagnosisDate)}</span>
                       )}
                     </div>
+                    {history.doctorName ? (
+                      <div className="history-row">
+                        <span className="history-label">Recorded by:</span>
+                        <span>{history.doctorName}</span>
+                      </div>
+                    ) : null}
                     {history.symptoms && (
                       <div className="history-row">
                         <span className="history-label">Symptoms:</span>
