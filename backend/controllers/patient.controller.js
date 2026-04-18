@@ -1,5 +1,20 @@
 import patientService from '../services/patient.service.js';
 
+export async function getAdminMedicalRecords(req, res) {
+    try {
+        const result = await patientService.listMedicalRecordsForAdmin(req.query);
+        res.status(200).json({
+            message: 'Medical records retrieved successfully',
+            ...result,
+        });
+    } catch (err) {
+        console.error('Get admin medical records error:', err);
+        res.status(500).json({
+            message: err.message || 'Server error',
+        });
+    }
+}
+
 //ADD MEDICAL RECORD TO PATIENT 
 
 export async function addMedicalRecord(req, res) {
