@@ -113,7 +113,6 @@
   outline: none;
 }
 
-/* Scoped so other pages' .register-button (e.g. AddDoctorForm) don't override */
 .register-card .register-button {
   background-color: #2C5F7C;
   color: white;
