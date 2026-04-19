@@ -7,8 +7,70 @@ import { promisify } from "util";
 import User from "../models/user.model.js";
 import Appointment from "../models/appointment.model.js";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/emailService.js";
+import { userTextSearchCondition } from "../utils/searchHelpers.js";
+import { attachDoctorNamesToMedicalHistory } from "../utils/medicalHistoryDoctorNames.js";
+import { isCalendarDateAfterToday } from "../utils/dateValidation.js";
 
 const resolveMx = promisify(dns.resolveMx);
+
+/**
+ * Patient profile saves often send only condition/diagnosisDate/notes. Without merging,
+ * doctorId, prescription, and other doctor-entered fields are wiped and admin cannot show doctor names.
+ * Match incoming rows to existing subdocuments by _id and preserve protected fields from the DB.
+ */
+function mergePatientMedicalHistoryForUpdate(existingEntries = [], incomingEntries = []) {
+    const existingById = new Map();
+    for (const e of existingEntries) {
+        if (e && e._id != null) {
+            existingById.set(String(e._id), e);
+        }
+    }
+    const incoming = Array.isArray(incomingEntries) ? incomingEntries : [];
+    const merged = [];
+
+    for (const inc of incoming) {
+        if (!inc || typeof inc !== "object") continue;
+
+        const idKey = inc._id != null ? String(inc._id) : "";
+        const prev = idKey && existingById.has(idKey) ? existingById.get(idKey) : null;
+
+        if (prev) {
+            let diagnosisDate = prev.diagnosisDate || null;
+            if (inc.diagnosisDate != null && inc.diagnosisDate !== "") {
+                const d = new Date(inc.diagnosisDate);
+                if (!Number.isNaN(d.getTime())) diagnosisDate = d;
+            }
+            merged.push({
+                _id: prev._id,
+                condition: (inc.condition ?? prev.condition ?? "").toString().trim() || "",
+                diagnosisDate,
+                notes: (inc.notes ?? prev.notes ?? "").toString(),
+                symptoms: prev.symptoms || "",
+                prescription: prev.prescription || "",
+                followUpInstructions: prev.followUpInstructions || "",
+                testRecommendations: prev.testRecommendations || "",
+                doctorId: prev.doctorId != null ? prev.doctorId : null,
+            });
+        } else {
+            let diagnosisDate = null;
+            if (inc.diagnosisDate != null && inc.diagnosisDate !== "") {
+                const d = new Date(inc.diagnosisDate);
+                if (!Number.isNaN(d.getTime())) diagnosisDate = d;
+            }
+            merged.push({
+                condition: (inc.condition ?? "").toString().trim() || "",
+                diagnosisDate,
+                notes: (inc.notes ?? "").toString().trim() || "",
+                symptoms: (inc.symptoms ?? "").toString().trim() || "",
+                prescription: (inc.prescription ?? "").toString().trim() || "",
+                followUpInstructions: (inc.followUpInstructions ?? "").toString().trim() || "",
+                testRecommendations: (inc.testRecommendations ?? "").toString().trim() || "",
+                doctorId: null,
+            });
+        }
+    }
+    return merged;
+}
 
 //  REGISTER FUNCTION
 export async function register(req, res) {
@@ -502,7 +564,12 @@ export async function updateProfile(req, res) {
         if (lastName !== undefined) updateData.lastName = lastName;
         if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
         if (address !== undefined) updateData.address = address;
-        if (dateOfBirth !== undefined) updateData.dateOfBirth = new Date(dateOfBirth);
+        if (dateOfBirth !== undefined && dateOfBirth !== null && String(dateOfBirth).trim() !== "") {
+            if (isCalendarDateAfterToday(dateOfBirth)) {
+                return res.status(400).json({ message: "Date of birth cannot be in the future." });
+            }
+            updateData.dateOfBirth = new Date(dateOfBirth);
+        }
         if (gender !== undefined) {
             const validGenders = ["male", "female", "other", "prefer not to say"];
             if (validGenders.includes(gender)) {
@@ -525,7 +592,30 @@ export async function updateProfile(req, res) {
             }
             if (insuranceInfo !== undefined) updateData.insuranceInfo = insuranceInfo;
             if (medicalHistory !== undefined) {
-                updateData.medicalHistory = Array.isArray(medicalHistory) ? medicalHistory : [medicalHistory];
+                const incoming = Array.isArray(medicalHistory) ? medicalHistory : [medicalHistory];
+                for (const entry of incoming) {
+                    if (
+                        entry?.diagnosisDate != null &&
+                        String(entry.diagnosisDate).trim() !== "" &&
+                        isCalendarDateAfterToday(entry.diagnosisDate)
+                    ) {
+                        return res.status(400).json({
+                            message: "Diagnosis date cannot be in the future.",
+                        });
+                    }
+                }
+                const mergedHistory = mergePatientMedicalHistoryForUpdate(
+                    user.medicalHistory || [],
+                    incoming
+                );
+                for (const row of mergedHistory) {
+                    if (row.diagnosisDate && isCalendarDateAfterToday(row.diagnosisDate)) {
+                        return res.status(400).json({
+                            message: "Diagnosis date cannot be in the future.",
+                        });
+                    }
+                }
+                updateData.medicalHistory = mergedHistory;
             }
         }
 
@@ -598,6 +688,11 @@ export async function updateProfile(req, res) {
         }
 
         // Prepare response (exclude sensitive data) - use updatedUser to ensure latest data
+        const patientMedicalHistoryForResponse =
+            updatedUser.role === "patient"
+                ? await attachDoctorNamesToMedicalHistory(updatedUser.medicalHistory || [])
+                : undefined;
+
         const userResponse = {
             id: updatedUser._id,
             username: updatedUser.username,
@@ -614,7 +709,8 @@ export async function updateProfile(req, res) {
                 bloodGroup: updatedUser.bloodGroup,
                 emergencyContact: updatedUser.emergencyContact,
                 allergies: updatedUser.allergies,
-                insuranceInfo: updatedUser.insuranceInfo
+                insuranceInfo: updatedUser.insuranceInfo,
+                medicalHistory: patientMedicalHistoryForResponse,
             }),
             ...(updatedUser.role === "doctor" && {
                 specialization: updatedUser.specialization,
@@ -676,6 +772,11 @@ export async function getProfile(req, res) {
             });
         }
 
+        const patientMedicalHistory =
+            user.role === "patient"
+                ? await attachDoctorNamesToMedicalHistory(user.medicalHistory || [])
+                : undefined;
+
         const userResponse = {
             id: user._id,
             username: user.username,
@@ -693,7 +794,7 @@ export async function getProfile(req, res) {
                 emergencyContact: user.emergencyContact,
                 allergies: user.allergies,
                 insuranceInfo: user.insuranceInfo,
-                medicalHistory: user.medicalHistory
+                medicalHistory: patientMedicalHistory,
             }),
             ...(user.role === "doctor" && {
                 specialization: user.specialization,
@@ -1086,14 +1187,11 @@ export async function getAllUsers(req, res) {
             filter.isEmailVerified = isEmailVerified === 'true' || isEmailVerified === true;
         }
 
-        // Search filter (username, email, firstName, lastName)
         if (search) {
-            filter.$or = [
-                { username: { $regex: search, $options: 'i' } },
-                { email: { $regex: search, $options: 'i' } },
-                { firstName: { $regex: search, $options: 'i' } },
-                { lastName: { $regex: search, $options: 'i' } }
-            ];
+            const nameCond = userTextSearchCondition(search);
+            if (nameCond) {
+                filter.$or = nameCond.$or;
+            }
         }
 
         // Calculate pagination
@@ -1273,21 +1371,32 @@ export async function updateMedicalRecord(req, res) {
             }
         }
 
-        // Update medical history
+        // Update medical history (preserve doctor-linked fields when patient only sends partial rows)
         if (medicalHistory !== undefined) {
             if (Array.isArray(medicalHistory)) {
-                // Validate each medical history entry
-                const validHistory = medicalHistory.map(entry => {
-                    if (typeof entry === 'object' && entry !== null) {
-                        return {
-                            condition: entry.condition || '',
-                            diagnosisDate: entry.diagnosisDate ? new Date(entry.diagnosisDate) : null,
-                            notes: entry.notes || ''
-                        };
+                for (const entry of medicalHistory) {
+                    if (
+                        entry?.diagnosisDate != null &&
+                        String(entry.diagnosisDate).trim() !== "" &&
+                        isCalendarDateAfterToday(entry.diagnosisDate)
+                    ) {
+                        return res.status(400).json({
+                            message: "Diagnosis date cannot be in the future.",
+                        });
                     }
-                    return entry;
-                });
-                updateData.medicalHistory = validHistory;
+                }
+                const mergedHistory = mergePatientMedicalHistoryForUpdate(
+                    user.medicalHistory || [],
+                    medicalHistory
+                );
+                for (const row of mergedHistory) {
+                    if (row.diagnosisDate && isCalendarDateAfterToday(row.diagnosisDate)) {
+                        return res.status(400).json({
+                            message: "Diagnosis date cannot be in the future.",
+                        });
+                    }
+                }
+                updateData.medicalHistory = mergedHistory;
             } else {
                 return res.status(400).json({ 
                     message: "Medical history must be an array" 
@@ -1308,6 +1417,10 @@ export async function updateMedicalRecord(req, res) {
 
         console.log(`✅ Medical record updated for patient: ${updatedUser.username}`);
 
+        const medicalHistoryWithNames = await attachDoctorNamesToMedicalHistory(
+            updatedUser.medicalHistory || []
+        );
+
         res.status(200).json({
             message: 'Medical record updated successfully',
             medicalRecord: {
@@ -1315,7 +1428,7 @@ export async function updateMedicalRecord(req, res) {
                 bloodGroup: updatedUser.bloodGroup,
                 allergies: updatedUser.allergies,
                 insuranceInfo: updatedUser.insuranceInfo,
-                medicalHistory: updatedUser.medicalHistory,
+                medicalHistory: medicalHistoryWithNames,
                 updatedAt: updatedUser.updatedAt
             }
         });
