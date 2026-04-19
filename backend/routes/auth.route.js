@@ -18,6 +18,8 @@ import {
 } from '../controllers/auth.controller.js';
 
 import { protect, allowRoles, optionalAuth } from '../middleware/auth.middleware.js';
+import { uploadProfilePhotoMiddleware } from '../middleware/profilePhotoUpload.js';
+import { uploadProfilePhoto } from '../controllers/profilePhoto.controller.js';
 
 // Public routes
 router.post('/register', register);
@@ -36,6 +38,7 @@ router.post('/change-password', protect, changePassword); // Change password req
 // Profile routes
 router.get('/profile', protect, getProfile); // User must be logged in
 router.get('/profile/:userId', protect, allowRoles('admin'), getProfile); // Admin can view any profile
+router.post('/profile/photo', protect, uploadProfilePhotoMiddleware, uploadProfilePhoto); // Cloudinary profile image
 router.put('/profile', protect, updateProfile); // User updates own profile
 router.put('/profile/:userId', protect, allowRoles('admin'), updateProfile); // Admin updates any profile
 

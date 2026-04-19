@@ -7,10 +7,10 @@ import {
     updateAvailability,
     setDoctorStatus
 } from '../controllers/doctor.controller.js';
-import { protect, allowRoles } from '../middleware/auth.middleware.js';
+import { protect, allowRoles, optionalAuth } from '../middleware/auth.middleware.js';
 
-// Public routes (anyone can view doctors)
-router.get('/', getAllDoctors);
+// Public (optional admin JWT includes inactive doctors for management UI)
+router.get('/', optionalAuth, getAllDoctors);
 router.get('/:id', getDoctorById);
 
 // Protected routes
