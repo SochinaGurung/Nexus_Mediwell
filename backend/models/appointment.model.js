@@ -33,6 +33,10 @@ const appointmentSchema = new Schema({
         type: String,
         trim: true
     },
+    dayBeforeReminderSentAt: {
+        type: Date,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now

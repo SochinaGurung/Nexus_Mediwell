@@ -8,13 +8,13 @@ const reminderSchema = new Schema(
     suggestion: {
       type: Schema.Types.ObjectId,
       ref: 'MedicineSuggestion',
-      required: true,
+      default: null,
       index: true
     },
     doctor: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      default: null,
       index: true
     },
     patient: {

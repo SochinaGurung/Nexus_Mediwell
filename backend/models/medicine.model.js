@@ -38,6 +38,23 @@ const medicineSuggestionSchema = new Schema(
       trim: true,
       default: ''
     },
+    timesPerDay: {
+      type: Number,
+      default: 1,
+      min: 1,
+      max: 12
+    },
+    mealTiming: {
+      type: String,
+      enum: ['before_meal', 'after_meal', 'with_meal', 'anytime'],
+      default: 'anytime'
+    },
+    durationDays: {
+      type: Number,
+      default: 1,
+      min: 1,
+      max: 365
+    },
     suggestedFromDate: {
       type: Date,
       required: true

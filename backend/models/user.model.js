@@ -72,8 +72,18 @@ const userSchema = new Schema({
     medicalHistory: [{
         condition: String,
         diagnosisDate: Date,
-        notes: String
+        symptoms: String,
+        prescription: String,
+        notes: String,
+        followUpInstructions: String,
+        testRecommendations: String,
+        doctorId: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            default: null
+        }
     }],
+    
     allergies: [{
         type: String
     }],
