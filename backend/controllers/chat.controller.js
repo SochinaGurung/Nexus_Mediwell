@@ -21,14 +21,23 @@ export async function getChatableUsers(req, res) {
       .populate('doctor', 'firstName lastName username')
       .lean();
 
+    const userIdStr = String(userId);
     const otherIds = new Set();
     if (role === 'doctor') {
-      completed.filter((a) => a.doctor?._id?.toString() === userId).forEach((a) => otherIds.add(a.patient?._id?.toString()));
+      completed.filter((a) => a.doctor?._id?.toString() === userIdStr).forEach((a) => otherIds.add(a.patient?._id?.toString()));
     } else {
-      completed.filter((a) => a.patient?._id?.toString() === userId).forEach((a) => otherIds.add(a.doctor?._id?.toString()));
+      completed.filter((a) => a.patient?._id?.toString() === userIdStr).forEach((a) => otherIds.add(a.doctor?._id?.toString()));
     }
 
-    const ids = [...otherIds].filter(Boolean);
+    // Do not suggest people you already have a thread with (e.g. after another completed visit)
+    const existingConvs = await Conversation.find({ members: userIdStr }).select('members').lean();
+    const alreadyChatting = new Set();
+    for (const c of existingConvs) {
+      const other = (c.members || []).find((m) => String(m) !== userIdStr);
+      if (other) alreadyChatting.add(String(other));
+    }
+
+    const ids = [...otherIds].filter(Boolean).filter((id) => !alreadyChatting.has(String(id)));
     if (ids.length === 0) {
       return res.status(200).json({ message: 'Chatable users', users: [] });
     }
@@ -78,8 +87,10 @@ export async function createOrGetConversation(req, res) {
       return res.status(400).json({ message: 'Chat is for patients and doctors only' });
     }
 
-    const patientId = role === 'patient' ? userId : otherUserId;
-    const doctorId = role === 'doctor' ? userId : otherUserId;
+    const uid = String(userId);
+    const oid = String(otherUserId);
+    const patientId = role === 'patient' ? uid : oid;
+    const doctorId = role === 'doctor' ? uid : oid;
     const hasCompletedAppointment = await Appointment.exists({
       patient: patientId,
       doctor: doctorId,
@@ -92,12 +103,12 @@ export async function createOrGetConversation(req, res) {
     }
 
     let conversation = await Conversation.findOne({
-      members: { $all: [userId, otherUserId] }
+      members: { $all: [uid, oid] }
     });
 
     if (!conversation) {
       conversation = await Conversation.create({
-        members: [userId, otherUserId]
+        members: [uid, oid]
       });
     }
 
@@ -160,9 +171,33 @@ export async function getConversations(req, res) {
       })
     );
 
+    // One row per counterparty (legacy DB could have duplicate member-pair conversations)
+    const sorted = [...list].sort((a, b) => {
+      const ta = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
+      const tb = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
+      if (tb !== ta) return tb - ta;
+      return new Date(b.updatedAt) - new Date(a.updatedAt);
+    });
+    const mergedByOther = new Map();
+    for (const row of sorted) {
+      const key = String(row.otherUser.id);
+      if (!mergedByOther.has(key)) {
+        mergedByOther.set(key, { ...row });
+      } else {
+        const m = mergedByOther.get(key);
+        m.unreadCount = (m.unreadCount || 0) + (row.unreadCount || 0);
+        if (!m.lastMessage?.text && row.lastMessage?.text) {
+          m.lastMessage = row.lastMessage;
+        }
+      }
+    }
+    const deduped = Array.from(mergedByOther.values()).sort(
+      (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+    );
+
     return res.status(200).json({
       message: 'Conversations retrieved',
-      conversations: list
+      conversations: deduped
     });
   } catch (err) {
     console.error('Get conversations error:', err);

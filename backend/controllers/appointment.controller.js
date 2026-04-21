@@ -89,6 +89,36 @@ const verifyToken = (authHeader) => {
     }
 };
 
+/** Doctor ref may be null (deleted user) or an unpopulated ObjectId — avoid 500s when mapping. */
+function formatDoctorForPatientList(doctor) {
+    if (!doctor) {
+        return null;
+    }
+    const isPopulated =
+        typeof doctor === "object" &&
+        doctor != null &&
+        doctor._id != null &&
+        ("username" in doctor || "email" in doctor || "firstName" in doctor || "lastName" in doctor);
+    if (isPopulated) {
+        return {
+            id: doctor._id,
+            username: doctor.username,
+            email: doctor.email,
+            name: `${doctor.firstName || ""} ${doctor.lastName || ""}`.trim() || doctor.username || "Doctor",
+            specialization: doctor.specialization,
+            department: doctor.department,
+        };
+    }
+    return {
+        id: doctor,
+        username: "—",
+        email: "",
+        name: "Doctor (details unavailable)",
+        specialization: undefined,
+        department: undefined,
+    };
+}
+
 // Book Appointment, it requires patient authentication
 export async function bookAppointment(req, res) {
     try {
@@ -235,23 +265,16 @@ export async function getMyAppointments(req, res) {
 
         res.status(200).json({
             message: "Appointments retrieved successfully",
-            appointments: appointments.map(apt => ({
+            appointments: appointments.map((apt) => ({
                 id: apt._id,
-                doctor: {
-                    id: apt.doctor._id,
-                    username: apt.doctor.username,
-                    email: apt.doctor.email,
-                    name: `${apt.doctor.firstName || ''} ${apt.doctor.lastName || ''}`.trim(),
-                    specialization: apt.doctor.specialization,
-                    department: apt.doctor.department
-                },
+                doctor: formatDoctorForPatientList(apt.doctor),
                 appointmentDate: apt.appointmentDate,
                 appointmentTime: apt.appointmentTime,
                 reason: apt.reason,
                 status: apt.status,
                 notes: apt.notes,
-                createdAt: apt.createdAt
-            }))
+                createdAt: apt.createdAt,
+            })),
         });
 
     } catch (err) {

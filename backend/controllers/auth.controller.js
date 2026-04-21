@@ -13,6 +13,40 @@ import { isCalendarDateAfterToday } from "../utils/dateValidation.js";
 
 const resolveMx = promisify(dns.resolveMx);
 
+function getRefreshSecret() {
+    return process.env.REFRESH_JWT_SECRET || process.env.JWT_SECRET;
+}
+
+function accessTokenExpiresIn() {
+    return process.env.JWT_EXPIRES_IN || "1h";
+}
+
+function refreshTokenExpiresIn() {
+    return process.env.JWT_REFRESH_EXPIRES_IN || "7d";
+}
+
+function issueAccessToken(user) {
+    return jwt.sign(
+        { userId: user._id, username: user.username, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: accessTokenExpiresIn() }
+    );
+}
+
+function issueRefreshToken(user) {
+    return jwt.sign(
+        { userId: user._id.toString(), type: "refresh" },
+        getRefreshSecret(),
+        { expiresIn: refreshTokenExpiresIn() }
+    );
+}
+
+async function persistRefreshToken(user, refreshToken) {
+    const hash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+    user.refreshTokenHash = hash;
+    await user.save();
+}
+
 /**
  * Patient profile saves often send only condition/diagnosisDate/notes. Without merging,
  * doctorId, prescription, and other doctor-entered fields are wiped and admin cannot show doctor names.
@@ -421,15 +455,14 @@ export async function login(req, res) {
             return res.status(401).json({ message: 'Incorrect password' });
         }
 
-        // Creating JWT token 
-        const token = jwt.sign(
-            { userId: user._id, username: user.username, role: user.role },
-            process.env.JWT_SECRET, 
-            { expiresIn: '1h' }
-        );
+        const token = issueAccessToken(user);
+        const refreshToken = issueRefreshToken(user);
+        await persistRefreshToken(user, refreshToken);
+
         res.status(200).json({
             message: 'Login successful',
-            token: token,
+            token,
+            refreshToken,
             user: {
                 id: user._id,
                 username: user.username,
@@ -444,43 +477,71 @@ export async function login(req, res) {
     }
 }
 
-//  LOGOUT FUNCTION
+/** Issue a new access token (and rotated refresh token) when refresh JWT is valid and stored hash matches. */
+export async function refreshAccessToken(req, res) {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken || typeof refreshToken !== "string") {
+            return res.status(400).json({ message: "Refresh token is required" });
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(refreshToken, getRefreshSecret());
+        } catch {
+            return res.status(401).json({ message: "Invalid or expired refresh token" });
+        }
+
+        if (decoded.type !== "refresh" || !decoded.userId) {
+            return res.status(401).json({ message: "Invalid refresh token" });
+        }
+
+        const user = await User.findById(decoded.userId);
+        if (!user || !user.refreshTokenHash) {
+            return res.status(401).json({ message: "Invalid refresh token" });
+        }
+
+        const hash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+        if (hash !== user.refreshTokenHash) {
+            return res.status(401).json({ message: "Invalid refresh token" });
+        }
+
+        const newAccess = issueAccessToken(user);
+        const newRefresh = issueRefreshToken(user);
+        await persistRefreshToken(user, newRefresh);
+
+        res.status(200).json({
+            message: "Token refreshed",
+            token: newAccess,
+            refreshToken: newRefresh,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (err) {
+        console.error("refreshAccessToken:", err);
+        res.status(500).json({ message: "Server error", error: err.message });
+    }
+}
+
+//  LOGOUT FUNCTION — requires protect; revokes refresh token server-side
 export async function logout(req, res) {
     try {
-        const authHeader = req.headers.authorization;
-        
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({ 
-                message: "No token provided. You are already logged out." 
-            });
+        const userId = req.user?.userId;
+        if (!userId) {
+            return res.status(401).json({ message: "Not authorized" });
         }
 
-        const token = authHeader.split(" ")[1];
-        
-        try {
-            // Verify token to ensure it's valid
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            
-            // Get user info
-            const user = await User.findById(decoded.userId);
-        if (!user) {
-                return res.status(404).json({ message: 'User not found' });
-            }
+        await User.findByIdAndUpdate(userId, { $set: { refreshTokenHash: null } });
+        const user = await User.findById(userId).select("username");
 
-            res.status(200).json({
-                message: 'Logout successful',
-                user: {
-                    id: user._id,
-                    username: user.username
-                }
-            });
-        } catch (err) {
-            // Token is invalid or expired - user is effectively logged out
-            return res.status(200).json({ 
-                message: 'Logout successful. Token was already invalid.' 
-            });
-        }
-
+        res.status(200).json({
+            message: "Logout successful",
+            user: user ? { id: userId, username: user.username } : { id: userId }
+        });
     } catch (err) {
         console.log("Logout error:", err);
         res.status(500).json({ message: 'Server error', error: err.message });
