@@ -13,7 +13,7 @@
 .register-card {
   background: #ffffff;
   width: 100%;
-  max-width: 550px;
+  max-width: 720px;
   border-radius: 16px;
   padding: 35px 40px;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
@@ -54,6 +54,18 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+
+/* Two fields (label + input) per row */
+.add-doctor-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+  align-items: start;
+}
+
+.add-doctor-form-row > .form-group {
+  min-width: 0;
 }
 
 /* Form Group */
@@ -220,6 +232,12 @@
 }
 
 /* Responsive */
+@media (max-width: 640px) {
+  .add-doctor-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 600px) {
   .register-card {
     padding: 25px;

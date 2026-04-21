@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { authService } from '../../services/authService'
+import { getLocalDateInputMax } from '../../utils/dateInputMax'
 import './PatientProfile.css'
 import './EditPatientProfile.css'
 
@@ -258,7 +259,7 @@ export default function EditPatientProfile() {
             </section>
             <section className="profile-edit-section">
               <h2>Personal Information</h2>
-              <div className="form-row">
+              <div className="form-row form-row-cols-3">
                 <div className="form-group">
                   <label>First Name</label>
                   <input value={form.firstName ?? ''} onChange={(e) => update('firstName', e.target.value)} placeholder="First name" />
@@ -267,55 +268,73 @@ export default function EditPatientProfile() {
                   <label>Last Name</label>
                   <input value={form.lastName ?? ''} onChange={(e) => update('lastName', e.target.value)} placeholder="Last name" />
                 </div>
+                <div className="form-group">
+                  <label>Phone Number</label>
+                  <input type="tel" value={form.phoneNumber ?? ''} onChange={(e) => update('phoneNumber', e.target.value)} placeholder="Phone" />
+                </div>
               </div>
-              <div className="form-group">
-                <label>Phone Number</label>
-                <input type="tel" value={form.phoneNumber ?? ''} onChange={(e) => update('phoneNumber', e.target.value)} placeholder="Phone" />
-              </div>
-              <div className="form-group">
-                <label>Date of Birth</label>
-                <input type="date" value={form.dateOfBirth ?? ''} onChange={(e) => update('dateOfBirth', e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label>Gender</label>
-                <select value={form.gender ?? ''} onChange={(e) => update('gender', e.target.value)}>
-                  <option value="">Select</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
+              <div className="form-row form-row-cols-3">
+                <div className="form-group">
+                  <label>Date of Birth</label>
+                  <input
+                    type="date"
+                    max={getLocalDateInputMax()}
+                    value={form.dateOfBirth ?? ''}
+                    onChange={(e) => update('dateOfBirth', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Gender</label>
+                  <select value={form.gender ?? ''} onChange={(e) => update('gender', e.target.value)}>
+                    <option value="">Select</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Blood Group</label>
+                  <select value={form.bloodGroup ?? ''} onChange={(e) => update('bloodGroup', e.target.value)}>
+                    <option value="">Select</option>
+                    {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((b) => (
+                      <option key={b} value={b}>{b}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <h3>Address</h3>
-              <div className="form-group">
-                <label>Street</label>
-                <input value={form.address?.street ?? ''} onChange={(e) => update('address.street', e.target.value)} placeholder="Street" />
-              </div>
-              <div className="form-row">
+              <div className="form-row form-row-cols-3">
                 <div className="form-group">
                   <label>City</label>
                   <input value={form.address?.city ?? ''} onChange={(e) => update('address.city', e.target.value)} placeholder="City" />
                 </div>
-                
+                <div className="form-group">
+                  <label>State</label>
+                  <input value={form.address?.state ?? ''} onChange={(e) => update('address.state', e.target.value)} placeholder="State" />
+                </div>
+                <div className="form-group">
+                  <label>Country</label>
+                  <input value={form.address?.country ?? ''} onChange={(e) => update('address.country', e.target.value)} placeholder="Country" />
+                </div>
               </div>
-              <div className="form-group">
-                <label>Country</label>
-                <input value={form.address?.country ?? ''} onChange={(e) => update('address.country', e.target.value)} placeholder="Country" />
-              </div>
+              
             </section>
 
             <section className="profile-edit-section">
               <h2>Emergency Contact</h2>
-              <div className="form-group">
-                <label>Name</label>
-                <input value={form.emergencyContact?.name ?? ''} onChange={(e) => update('emergencyContact.name', e.target.value)} placeholder="Full name" />
-              </div>
-              <div className="form-group">
-                <label>Relationship</label>
-                <input value={form.emergencyContact?.relationship ?? ''} onChange={(e) => update('emergencyContact.relationship', e.target.value)} placeholder="e.g. Spouse, Parent" />
-              </div>
-              <div className="form-group">
-                <label>Phone Number</label>
-                <input type="tel" value={form.emergencyContact?.phoneNumber ?? ''} onChange={(e) => update('emergencyContact.phoneNumber', e.target.value)} placeholder="Phone" />
+              <div className="form-row form-row-cols-3">
+                <div className="form-group">
+                  <label>Name</label>
+                  <input value={form.emergencyContact?.name ?? ''} onChange={(e) => update('emergencyContact.name', e.target.value)} placeholder="Full name" />
+                </div>
+                <div className="form-group">
+                  <label>Relationship</label>
+                  <input value={form.emergencyContact?.relationship ?? ''} onChange={(e) => update('emergencyContact.relationship', e.target.value)} placeholder="e.g. Spouse, Parent" />
+                </div>
+                <div className="form-group">
+                  <label>Phone Number</label>
+                  <input type="tel" value={form.emergencyContact?.phoneNumber ?? ''} onChange={(e) => update('emergencyContact.phoneNumber', e.target.value)} placeholder="Phone" />
+                </div>
               </div>
               <div className="form-group">
                 <label>Email</label>
@@ -325,13 +344,6 @@ export default function EditPatientProfile() {
 
             <section className="profile-edit-section">
               <h2>Medical Information</h2>
-              <div className="form-group">
-                <label>Blood Group</label>
-                <select value={form.bloodGroup ?? ''} onChange={(e) => update('bloodGroup', e.target.value)}>
-                  <option value="">Select</option>
-                  {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((b) => <option key={b} value={b}>{b}</option>)}
-                </select>
-              </div>
               <div className="form-group">
                 <label>Allergies</label>
                 <div className="tag-input-row">
@@ -360,7 +372,7 @@ export default function EditPatientProfile() {
                         : 'Added by your doctor — prescription and related details are preserved when you save this profile.'}
                     </p>
                   ) : null}
-                  <div className="form-row">
+                  <div className="form-row form-row-cols-3 repeatable-medical-top-row">
                     <div className="form-group flex-1">
                       <label>Condition</label>
                       <input value={entry.condition} onChange={(e) => {
@@ -371,13 +383,21 @@ export default function EditPatientProfile() {
                     </div>
                     <div className="form-group">
                       <label>Diagnosis Date</label>
-                      <input type="date" value={entry.diagnosisDate ?? ''} onChange={(e) => {
-                        const next = [...(form.medicalHistory || [])]
-                        next[idx] = { ...entry, diagnosisDate: e.target.value }
-                        setForm((f) => ({ ...f, medicalHistory: next }))
-                      }} />
+                      <input
+                        type="date"
+                        max={getLocalDateInputMax()}
+                        value={entry.diagnosisDate ?? ''}
+                        onChange={(e) => {
+                          const next = [...(form.medicalHistory || [])]
+                          next[idx] = { ...entry, diagnosisDate: e.target.value }
+                          setForm((f) => ({ ...f, medicalHistory: next }))
+                        }}
+                      />
                     </div>
-                    <button type="button" onClick={() => removeMedicalEntry(idx)} className="btn-remove">Remove</button>
+                    <div className="form-group form-group-action-col">
+                      <label className="form-label-action"> </label>
+                      <button type="button" onClick={() => removeMedicalEntry(idx)} className="btn-remove btn-remove-block">Remove</button>
+                    </div>
                   </div>
                   <div className="form-group">
                     <label>Notes</label>

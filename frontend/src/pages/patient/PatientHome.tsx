@@ -10,7 +10,8 @@ import { PatientMedicineNotificationBell } from '../../contexts/PatientMedicineN
 import './PatientHome.css'
 
 const Home = () => {
-  const { dueNotifications, openReminderById } = useMedicineReminderUi()
+  const { dueNotifications, openReminderById, setNotificationsPanelOpen, unreadReminderCount } =
+    useMedicineReminderUi()
   const currentUser = authService.getCurrentUser()
   const displayName = currentUser?.username || localStorage.getItem('username') || 'Patient'
   const navigate = useNavigate()
@@ -331,6 +332,25 @@ const Home = () => {
                   </span>
                   <p className="patient-category-label">Medicines & Reminders</p>
                   <span className="patient-category-desc">See medicines and set reminder</span>
+                </button>
+                <button
+                  type="button"
+                  className="patient-category-card patient-category-blue"
+                  onClick={() => setNotificationsPanelOpen(true)}
+                >
+                  <div className="patient-category-inline-title">
+                    <span className="patient-category-icon">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" strokeLinecap="round" />
+                      </svg>
+                    </span>
+                    <p className="patient-category-label">Notifications</p>
+                    {unreadReminderCount > 0 ? (
+                      <span className="patient-category-inline-badge">{unreadReminderCount > 99 ? '99+' : unreadReminderCount}</span>
+                    ) : null}
+                  </div>
+                  <span className="patient-category-desc">Medicine reminder alerts and history</span>
                 </button>
               </div>
 

@@ -97,8 +97,36 @@
   gap: 16px;
 }
 
+.profile-edit-form .form-row-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 768px) {
+  .profile-edit-form .form-row-cols-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
 .form-row .form-group {
   margin-bottom: 16px;
+}
+
+.form-group-action-col .form-label-action {
+  visibility: hidden;
+  margin-bottom: 6px;
+  min-height: 1.25em;
+}
+
+.form-group-action-col .btn-remove-block {
+  width: 100%;
+}
+
+.repeatable-medical-top-row {
+  align-items: end;
+}
+
+.flex-1 {
+  min-width: 0;
 }
 
 .form-hint {
@@ -157,10 +185,6 @@
 
 .repeatable-block .form-row {
   align-items: flex-end;
-}
-
-.flex-1 {
-  min-width: 0;
 }
 
 .btn-secondary {

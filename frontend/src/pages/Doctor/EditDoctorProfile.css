@@ -148,6 +148,16 @@
   gap: 16px;
 }
 
+.profile-edit-form .form-row-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 768px) {
+  .profile-edit-form .form-row-cols-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
 .form-row .form-group {
   margin-bottom: 16px;
 }
@@ -167,6 +177,12 @@
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 12px;
+}
+
+.qualification-remove-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
 }
 
 .repeatable-block .form-row {

@@ -138,9 +138,17 @@ export default function Footer() {
         <div className="footer-col form-col">
           <h4>FEEDBACK FORM</h4>
 
-          <form onSubmit={handleSubmit}>
-            {error && <div className="feedback-error">{error}</div>}
-            {success && <div className="feedback-success">{success}</div>}
+          <form onSubmit={handleSubmit} noValidate>
+            {error && (
+              <div className="feedback-error" role="alert">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="feedback-success" role="status">
+                {success}
+              </div>
+            )}
 
             <label htmlFor="fullName">Full Name <span>*</span></label>
             <input

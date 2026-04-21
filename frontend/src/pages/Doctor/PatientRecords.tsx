@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { patientService, type Patient, type MedicalRecordData } from '../../services/patientService'
+import { getLocalDateInputMax } from '../../utils/dateInputMax'
 import { appointmentService } from '../../services/appointmentService'
 import { authService } from '../../services/authService'
 import { medicineReminderService } from '../../services/medicineReminderService'
@@ -234,11 +235,6 @@ export default function ManagePatientRecords() {
     })
   }
 
-  const getMinDate = () => {
-    const today = new Date()
-    return today.toISOString().split('T')[0]
-  }
-
   return (
     <>
       <Header />
@@ -418,11 +414,11 @@ export default function ManagePatientRecords() {
                   <label htmlFor="diagnosisDate">Diagnosis Date</label>
                   <input
                     type="date"
+                    max={getLocalDateInputMax()}
                     id="diagnosisDate"
                     name="diagnosisDate"
                     value={medicalRecord.diagnosisDate ?? ''}
                     onChange={handleMedicalRecordChange}
-                    max={getMinDate()}
                   />
                 </div>
 

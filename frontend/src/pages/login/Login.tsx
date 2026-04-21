@@ -11,6 +11,7 @@ interface LoginFormData {
 interface LoginResponse {
   message: string
   token: string
+  refreshToken: string
   user: {
     id: string
     username: string
@@ -64,38 +65,26 @@ export default function Login() {
     try {
       const response = (await authService.login(
         formData.username,
-        formData.password
+        formData.password,
+        rememberMe
       )) as LoginResponse
 
       if (response.token) {
+        const { role } = response.user
 
-        const storage = rememberMe ? localStorage : sessionStorage
+        const selectedDoctorId = localStorage.getItem('selectedDoctorId')
+        const fromBooking = location.state?.from === 'book-appointment'
 
-      // Store token
-      storage.setItem('token', response.token)
-      //Storing username for Home page
-      storage.setItem('username', response.user.username)
-      storage.setItem('role', response.user.role)
-
-
-      const { role } = response.user
-      
-      // Checking if user is trying to book an appointment
-      const selectedDoctorId = localStorage.getItem('selectedDoctorId')
-      const fromBooking = location.state?.from === 'book-appointment'
-      
-      if (role === 'admin') {
-        navigate('/admin/dashboard',{replace:true})
-      } else if (role === 'doctor') {
-        navigate('/doctor/dashboard',{replace:true})
-      } else if (fromBooking && selectedDoctorId) {
-        // Redirect to appointment booking page if coming from booking
-        navigate('/appointments/book',{replace:true})
-      } else {
-        navigate('/patient/dashboard',{replace:true})
+        if (role === 'admin') {
+          navigate('/admin/dashboard', { replace: true })
+        } else if (role === 'doctor') {
+          navigate('/doctor/dashboard', { replace: true })
+        } else if (fromBooking && selectedDoctorId) {
+          navigate('/appointments/book', { replace: true })
+        } else {
+          navigate('/patient/dashboard', { replace: true })
+        }
       }
-    }
-
     } catch (err: unknown) {
       setError(
         (err as { message?: string })?.message ||

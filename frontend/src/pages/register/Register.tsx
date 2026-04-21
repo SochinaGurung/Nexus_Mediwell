@@ -103,12 +103,25 @@ export default function Register() {
         role: 'patient',
       })) as RegisterResponse
 
-      // Registration successful - email was validated before user creation
+      try {
+        const loginRes = await authService.login(
+          formData.username.trim(),
+          formData.password,
+          true
+        )
+        if (loginRes.token) {
+          navigate('/patient/dashboard', { replace: true })
+          return
+        }
+      } catch {
+        /* fall through: account exists but auto sign-in failed */
+      }
+
       setSuccess(
         response.message ||
-          'Registration successful! Please check your email to verify your account.'
+          'Account created. Please sign in to open your dashboard.'
       )
-      setTimeout(() => navigate('/login'), 3000)
+      navigate('/login', { replace: true })
     } catch (err: unknown) {
       const errorMessage =
         (err as { message?: string })?.message ||

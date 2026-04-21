@@ -187,62 +187,64 @@ export default function AddDoctorForm() {
           )}
           {success && <div className="success-message">{success}</div>}
 
-          <div className="form-group">
-            <label htmlFor="username">Doctors Name</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="Enter doctors name"
-              required
-              minLength={3}
-            />
+          <div className="add-doctor-form-row">
+            <div className="form-group">
+              <label htmlFor="username">Doctors Name</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                placeholder="Enter doctors name"
+                required
+                minLength={3}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter email"
+                required
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter email"
-              required
-            />
+          <div className="add-doctor-form-row">
+            <div className="form-group">
+              <label htmlFor="specialty">Specialty</label>
+              <input
+                type="text"
+                id="specialty"
+                name="specialty"
+                value={formData.specialty}
+                onChange={handleChange}
+                placeholder="Enter specialty (e.g., Cardiology)"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="department">Department</label>
+              <input
+                type="text"
+                id="department"
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                placeholder="Enter department (e.g., Surgery)"
+                required
+              />
+            </div>
           </div>
 
-          
-
-          <div className="form-group">
-            <label htmlFor="specialty">Specialty</label>
-            <input
-              type="text"
-              id="specialty"
-              name="specialty"
-              value={formData.specialty}
-              onChange={handleChange}
-              placeholder="Enter specialty (e.g., Cardiology)"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="department">Department</label>
-            <input
-              type="text"
-              id="department"
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              placeholder="Enter department (e.g., Surgery)"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="qualifications">Qualifications</label>
+          <div className="add-doctor-form-row">
+            <div className="form-group">
+              <label htmlFor="qualifications">Qualifications</label>
               <input
                 type="text"
                 id="qualifications"
@@ -252,47 +254,50 @@ export default function AddDoctorForm() {
                 placeholder="e.g., MBBS, MD"
                 required
               />
-          </div>
-          <div className="form-group">
-            <label htmlFor="experience">Years of Experience</label>
-            <input
-              type="number"
-              id="experience"
-              name="experience"
-              value={formData.experience}
-              onChange={handleChange}
-              placeholder="e.g., 5"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="licenseNumber">Medical License Number</label>
-            <input
-              type="text"
-              id="licenseNumber"
-              name="licenseNumber"
-              value={formData.licenseNumber}
-              onChange={handleChange}
-              placeholder="Enter license number"
-              required
-            />
+            </div>
+            <div className="form-group">
+              <label htmlFor="experience">Years of Experience</label>
+              <input
+                type="number"
+                id="experience"
+                name="experience"
+                value={formData.experience}
+                onChange={handleChange}
+                placeholder="e.g., 5"
+                required
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="consultationFee">Consultation fee (Rs.)</label>
-            <input
-              type="number"
-              id="consultationFee"
-              name="consultationFee"
-              value={formData.consultationFee}
-              onChange={handleChange}
-              placeholder="e.g., 1500"
-              min={0}
-              step={1}
-              inputMode="decimal"
-              required
-            />
-            <p className="form-hint-inline">Fee per consultation in Nepalese Rupees (Rs.).</p>
+          <div className="add-doctor-form-row">
+            <div className="form-group">
+              <label htmlFor="licenseNumber">Medical License Number</label>
+              <input
+                type="text"
+                id="licenseNumber"
+                name="licenseNumber"
+                value={formData.licenseNumber}
+                onChange={handleChange}
+                placeholder="Enter license number"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="consultationFee">Consultation fee (Rs.)</label>
+              <input
+                type="number"
+                id="consultationFee"
+                name="consultationFee"
+                value={formData.consultationFee}
+                onChange={handleChange}
+                placeholder="e.g., 1500"
+                min={0}
+                step={1}
+                inputMode="decimal"
+                required
+              />
+              <p className="form-hint-inline">Fee per consultation.</p>
+            </div>
           </div>
 
           <div className="form-group availability-section">
@@ -330,46 +335,47 @@ export default function AddDoctorForm() {
             </div>
           </div>
 
-          <div className="form-group password-wrapper">
-            <label htmlFor="password">Password</label>
-            <input
-              type={showPassword ? 'text' : 'password'}
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter password"
-              required
-              minLength={6}
-            />
-            <button
-              type="button"
-              className="password-toggle"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? 'Hide' : 'Show'}
-            </button>
-          </div>
-
-          <div className="form-group password-wrapper">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type={showConfirmPassword ? 'text' : 'password'}
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm password"
-              required
-              minLength={6}
-            />
-            <button
-              type="button"
-              className="password-toggle"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            >
-              {showConfirmPassword ? 'Hide' : 'Show'}
-            </button>
+          <div className="add-doctor-form-row">
+            <div className="form-group password-wrapper">
+              <label htmlFor="password">Password</label>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter password"
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+            <div className="form-group password-wrapper">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm password"
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
 
           <button type="submit" className="register-button" disabled={loading}>

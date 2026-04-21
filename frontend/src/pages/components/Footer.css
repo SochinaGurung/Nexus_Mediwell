@@ -104,8 +104,9 @@
   font-weight: 500;
 }
 
-.form-col span {
-  color: red;
+/* Required asterisk only (avoid coloring every span in the column) */
+.form-col label > span {
+  color: #c0392b;
 }
 
 .form-col input,
@@ -154,10 +155,16 @@
   transition: all 0.3s ease;
 }
 
-.submit-btn:hover {
+.submit-btn:hover:not(:disabled) {
   background: #214a60;
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(44, 95, 124, 0.25);
+}
+
+.submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* ================= ALERT MESSAGES ================= */
@@ -195,6 +202,10 @@
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 950px) {
+  .footer {
+    padding: 40px 24px 30px;
+  }
+
   .footer-top {
     grid-template-columns: 1fr;
     gap: 40px;

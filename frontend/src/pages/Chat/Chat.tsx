@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authService } from '../../services/authService'
 import {
@@ -38,8 +38,7 @@ export default function Chat() {
       navigate('/')
       return
     }
-    loadConversations()
-    loadChatableUsers()
+    void loadConversations().then(() => loadChatableUsers())
   }, [navigate, currentUser?.role])
 
   async function loadConversations() {
@@ -63,6 +62,14 @@ export default function Chat() {
       setChatableUsers([])
     }
   }
+
+  const newChatCandidates = useMemo(
+    () =>
+      chatableUsers.filter(
+        (u) => !conversations.some((c) => String(c.otherUser.id) === String(u.id))
+      ),
+    [chatableUsers, conversations]
+  )
 
   const openConversation = useCallback(
     async (conv: Conversation) => {
@@ -115,8 +122,14 @@ export default function Chat() {
         lastMessage: null,
         updatedAt: res.conversation.createdAt
       }
-      setConversations((prev) => [newConv, ...prev])
+      setConversations((prev) => {
+        const withoutSameOther = prev.filter(
+          (c) => String(c.otherUser.id) !== String(newConv.otherUser.id)
+        )
+        return [newConv, ...withoutSameOther]
+      })
       setShowNewChat(false)
+      await loadChatableUsers()
       await openConversation(newConv)
     } catch (err: unknown) {
       setError((err as { response?: { data?: { message?: string } } })?.response?.data?.message || (err as { message?: string })?.message || 'Cannot start chat')
@@ -131,7 +144,11 @@ export default function Chat() {
     const result = await sendMessage(selectedConv.id, text)
     setSending(false)
     if (result.ok && result.message) {
-      setMessages((prev) => [...prev, result.message!])
+      setMessages((prev) => {
+        const m = result.message!
+        if (prev.some((x) => String(x.id) === String(m.id))) return prev
+        return [...prev, m]
+      })
     } else if (!result.ok) {
       setError(result.error || 'Failed to send')
     }
@@ -166,19 +183,32 @@ export default function Chat() {
           >
             + Start New conversation
           </button>
-          {showNewChat && chatableUsers.length > 0 && (
+          {showNewChat && (
             <div className="chat-new-list">
-              <p className="chat-new-label">You cna only chat with the doctors that you have completed the appointment with:</p>
-              {chatableUsers.map((u) => (
-                <button
-                  key={u.id}
-                  type="button"
-                  className="chat-new-user"
-                  onClick={() => handleStartChat(u)}
-                >
-                  {u.name || u.username}
-                </button>
-              ))}
+              {newChatCandidates.length > 0 ? (
+                <>
+                  <p className="chat-new-label">
+                    You can only start a new chat with {isDoctor ? 'patients' : 'doctors'} you have a completed
+                    appointment with, and who you do not already have a conversation with:
+                  </p>
+                  {newChatCandidates.map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      className="chat-new-user"
+                      onClick={() => handleStartChat(u)}
+                    >
+                      {u.name || u.username}
+                    </button>
+                  ))}
+                </>
+              ) : (
+                <p className="chat-new-label">
+                  {isDoctor
+                    ? 'No new patients to add — you already have a thread with everyone you have completed appointments with, or none are available yet.'
+                    : 'No new doctors to add — you already have a thread with everyone you have completed appointments with, or none are available yet.'}
+                </p>
+              )}
             </div>
           )}
           {error && <p className="chat-error">{error}</p>}

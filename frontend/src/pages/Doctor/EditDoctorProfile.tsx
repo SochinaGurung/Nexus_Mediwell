@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { authService } from '../../services/authService'
+import { getLocalDateInputMax } from '../../utils/dateInputMax'
 //import './DoctorProfile.css'
 import './EditDoctorProfile.css'
 
@@ -280,7 +281,7 @@ export default function EditDoctorProfile() {
             </section>
             <section className="profile-edit-section">
               <h2>Personal Information</h2>
-              <div className="form-row">
+              <div className="form-row form-row-cols-3">
                 <div className="form-group">
                   <label>First Name</label>
                   <input
@@ -297,32 +298,43 @@ export default function EditDoctorProfile() {
                     placeholder="Last name"
                   />
                 </div>
+                <div className="form-group">
+                  <label>Phone Number</label>
+                  <input
+                    type="tel"
+                    value={form.phoneNumber ?? ''}
+                    onChange={(e) => update('phoneNumber', e.target.value)}
+                    placeholder="Phone"
+                  />
+                </div>
               </div>
-              <div className="form-group">
-                <label>Phone Number</label>
-                <input
-                  type="tel"
-                  value={form.phoneNumber ?? ''}
-                  onChange={(e) => update('phoneNumber', e.target.value)}
-                  placeholder="Phone"
-                />
-              </div>
-              <div className="form-group">
-                <label>Date of Birth</label>
-                <input
-                  type="date"
-                  value={form.dateOfBirth ?? ''}
-                  onChange={(e) => update('dateOfBirth', e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label>Gender</label>
-                <select value={form.gender ?? ''} onChange={(e) => update('gender', e.target.value)}>
-                  <option value="">Select</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
+              <div className="form-row form-row-cols-3">
+                <div className="form-group">
+                  <label>Date of Birth</label>
+                  <input
+                    type="date"
+                    max={getLocalDateInputMax()}
+                    value={form.dateOfBirth ?? ''}
+                    onChange={(e) => update('dateOfBirth', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Gender</label>
+                  <select value={form.gender ?? ''} onChange={(e) => update('gender', e.target.value)}>
+                    <option value="">Select</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Country</label>
+                  <input
+                    value={form.address?.country ?? ''}
+                    onChange={(e) => update('address.country', e.target.value)}
+                    placeholder="Country"
+                  />
+                </div>
               </div>
               <h3>Address</h3>
               <div className="form-group">
@@ -333,7 +345,7 @@ export default function EditDoctorProfile() {
                   placeholder="Street"
                 />
               </div>
-              <div className="form-row">
+              <div className="form-row form-row-cols-3">
                 <div className="form-group">
                   <label>City</label>
                   <input
@@ -359,41 +371,35 @@ export default function EditDoctorProfile() {
                   />
                 </div>
               </div>
-              <div className="form-group">
-                <label>Country</label>
-                <input
-                  value={form.address?.country ?? ''}
-                  onChange={(e) => update('address.country', e.target.value)}
-                  placeholder="Country"
-                />
-              </div>
             </section>
 
             <section className="profile-edit-section">
               <h2>Professional Information</h2>
-              <div className="form-group">
-                <label>Specialization</label>
-                <input
-                  value={form.specialization ?? ''}
-                  onChange={(e) => update('specialization', e.target.value)}
-                  placeholder="e.g. Cardiology"
-                />
-              </div>
-              <div className="form-group">
-                <label>Department</label>
-                <input
-                  value={form.department ?? ''}
-                  onChange={(e) => update('department', e.target.value)}
-                  placeholder="Department"
-                />
-              </div>
-              <div className="form-group">
-                <label>License Number</label>
-                <input
-                  value={form.licenseNumber ?? ''}
-                  onChange={(e) => update('licenseNumber', e.target.value)}
-                  placeholder="License number"
-                />
+              <div className="form-row form-row-cols-3">
+                <div className="form-group">
+                  <label>Specialization</label>
+                  <input
+                    value={form.specialization ?? ''}
+                    onChange={(e) => update('specialization', e.target.value)}
+                    placeholder="e.g. Cardiology"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Department</label>
+                  <input
+                    value={form.department ?? ''}
+                    onChange={(e) => update('department', e.target.value)}
+                    placeholder="Department"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>License Number</label>
+                  <input
+                    value={form.licenseNumber ?? ''}
+                    onChange={(e) => update('licenseNumber', e.target.value)}
+                    placeholder="License number"
+                  />
+                </div>
               </div>
               <div className="form-row">
                 <div className="form-group">
@@ -434,7 +440,7 @@ export default function EditDoctorProfile() {
               <h2>Qualifications</h2>
               {(form.qualifications || []).map((q, idx) => (
                 <div key={idx} className="repeatable-block">
-                  <div className="form-row">
+                  <div className="form-row form-row-cols-3">
                     <div className="form-group flex-1">
                       <label>Degree</label>
                       <input
@@ -472,12 +478,10 @@ export default function EditDoctorProfile() {
                         placeholder="Year"
                       />
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeQualification(idx)}
-                      className="btn-remove"
-                    >
-                      Remove
+                  </div>
+                  <div className="qualification-remove-row">
+                    <button type="button" onClick={() => removeQualification(idx)} className="btn-remove">
+                      Remove qualification
                     </button>
                   </div>
                 </div>
