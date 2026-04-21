@@ -165,6 +165,12 @@ const userSchema = new Schema({
         type: Date,
         default: null
     },
+
+    /** SHA-256 hash of the active refresh JWT; cleared on logout or new login (revocation). */
+    refreshTokenHash: {
+        type: String,
+        default: null,
+    },
     
     // Account status
     isActive: {

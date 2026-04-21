@@ -2,6 +2,15 @@ import express from 'express';
 import cors from 'cors'; 
 import authRoutes from './routes/auth.route.js';
 import appointmentRoutes from './routes/appointment.route.js';
+import feedbackRoutes from './routes/feedback.route.js';
+import departmentRoutes from './routes/department.route.js';
+import serviceRoutes from './routes/service.route.js';
+import doctorRoutes from './routes/doctor.route.js';
+import patientRoutes from './routes/patient.route.js';
+import chatRoutes from './routes/chat.route.js';
+import medicineRoutes from './routes/medicine.route.js';
+import reminderRoutes from './routes/reminder.route.js';
+import departmentSuggestionRoutes from './routes/departmentSuggestion.route.js';
 import dotenv from 'dotenv';
 
 const app = express();
@@ -21,9 +30,16 @@ app.use(express.json());
 // Prefix all routes with /api
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRoutes);
+app.use('/api/feedback', feedbackRoutes);
+app.use('/api/departments', departmentRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/doctors', doctorRoutes);
+app.use('/api/patients', patientRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/medicines', medicineRoutes);
+app.use('/api/reminders', reminderRoutes);
+app.use('/api/rag', departmentSuggestionRoutes);
 
-// Error handling middleware (must be last)
-// Note: Express requires 'next' parameter even if not used
 app.use((err, req, res, next) => {
     console.error('Error:', err);
     res.status(err.status || 500).json({

@@ -4,6 +4,7 @@ const router = Router();
 import {
     register,
     login,
+    refreshAccessToken,
     logout,
     updateProfile,
     getProfile,
@@ -24,6 +25,7 @@ import { uploadProfilePhoto } from '../controllers/profilePhoto.controller.js';
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
+router.post('/refresh', refreshAccessToken);
 router.post('/logout', protect, logout); // Logout requires login
 
 // Email verification routes

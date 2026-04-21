@@ -2,9 +2,7 @@ import User from "../models/user.model.js";
 import { userTextSearchCondition } from "../utils/searchHelpers.js";
 
 class DoctorService {
-    /**
-     * To fetch all doctors with filters
-     */
+    
     async getAllDoctors(filters = {}) {
         const { department, specialization, search, includeInactive } = filters;
 
@@ -138,7 +136,6 @@ class DoctorService {
     }
 
     //Update doctor availability for a specific day
-
     async updateAvailability(doctorId, day, availabilityData) {
         const doctor = await User.findOne({ _id: doctorId, role: "doctor" });
         

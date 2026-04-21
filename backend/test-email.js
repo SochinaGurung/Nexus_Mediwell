@@ -30,7 +30,7 @@ async function testEmail() {
     const testToken = 'test-token-12345';
     const testUsername = 'TestUser';
 
-    console.log(`📧 Attempting to send test email to: ${testEmail}\n`);
+    console.log(`Attempting to send test email to: ${testEmail}\n`);
 
     const result = await sendVerificationEmail(testEmail, testToken, testUsername);
 
