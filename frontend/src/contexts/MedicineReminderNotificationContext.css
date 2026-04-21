@@ -1,0 +1,277 @@
+.medicine-reminder-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: medicine-modal-fade-in 0.2s ease-out;
+}
+
+@keyframes medicine-modal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.medicine-reminder-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  max-width: min(400px, 100%);
+  width: 100%;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+  border: 1px solid #d8e3ec;
+  animation: medicine-modal-pop 0.25s ease-out;
+}
+
+@keyframes medicine-modal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.medicine-reminder-modal-heading {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e2a32;
+  line-height: 1.3;
+}
+
+.medicine-reminder-modal-medicine {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #2c5f7c;
+}
+
+.medicine-reminder-modal-time {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.medicine-reminder-modal-detail {
+  margin: 0 0 1.25rem;
+  font-size: 0.875rem;
+  color: #475569;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.medicine-reminder-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.medicine-reminder-modal-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+.medicine-reminder-modal-btn-primary {
+  background: #2c5f7c;
+  color: #fff;
+}
+
+.medicine-reminder-modal-btn-primary:hover {
+  background: #214a60;
+}
+
+.medicine-reminder-modal-btn-secondary {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #d8e3ec;
+}
+
+.medicine-reminder-modal-btn-secondary:hover {
+  background: #e2e8f0;
+}
+
+/* Medicine reminder bell + dropdown (sidebar on patient dashboard) */
+.patient-fb-notif-wrap {
+  position: relative;
+  width: 100%;
+  z-index: 30;
+  font-family: inherit;
+}
+
+.patient-fb-notif-bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: auto;
+  height: auto;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--patient-text-secondary, #666);
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  text-align: left;
+  font: inherit;
+  padding: 10px 12px;
+}
+
+.patient-fb-notif-bell:hover {
+  background: var(--patient-primary-light, #eaf2f7);
+  color: var(--patient-primary, #2c5f7c);
+  transform: none;
+}
+
+.patient-fb-notif-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: inherit;
+}
+
+.patient-fb-notif-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: min(360px, calc(100vw - 2rem));
+  max-height: min(420px, 70vh);
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  animation: patient-fb-notif-dropdown-in 0.2s ease-out;
+}
+
+@keyframes patient-fb-notif-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.patient-fb-notif-dropdown-header {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fafafa;
+}
+
+.patient-fb-notif-dropdown-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #050505;
+  letter-spacing: -0.02em;
+}
+
+.patient-fb-notif-dropdown-body {
+  overflow-y: auto;
+  max-height: 360px;
+}
+
+.patient-fb-notif-empty {
+  margin: 0;
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #65676b;
+}
+
+.patient-fb-notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid #f0f2f5;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: background 0.12s ease;
+}
+
+.patient-fb-notif-item:hover {
+  background: #f2f2f2;
+}
+
+.patient-fb-notif-item--unread {
+  background: #e7f3ff;
+}
+
+.patient-fb-notif-item--unread:hover {
+  background: #dbeafe;
+}
+
+.patient-fb-notif-item-avatar {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+}
+
+.patient-fb-notif-item-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.patient-fb-notif-item-line1 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #050505;
+  line-height: 1.25;
+}
+
+.patient-fb-notif-item-line2 {
+  font-size: 13px;
+  color: #65676b;
+  line-height: 1.3;
+}
+
+.patient-fb-notif-item-time {
+  font-size: 12px;
+  color: #65676b;
+  margin-top: 2px;
+}
+
+.patient-fb-notif-item-dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: #1877f2;
+}
+
